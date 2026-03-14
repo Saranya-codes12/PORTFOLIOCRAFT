@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio — PortfolioCraft</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Mono:wght@300;400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;min-height:100vh}
+
+    /* ── Action Bar ── */
+    .port-bar{
+      position:fixed;top:0;left:0;right:0;z-index:999;
+      padding:10px 20px;
+      display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+      background:rgba(8,8,8,0.92);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+      border-bottom:1px solid rgba(240,237,232,0.1);
+    }
+    .pb-left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .pb-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+    .pb-btn{
+      padding:7px 16px;border-radius:99px;border:1px solid rgba(240,237,232,0.22);
+      background:rgba(255,255,255,0.07);color:rgba(240,237,232,0.85);font-size:0.78rem;
+      font-weight:500;cursor:pointer;font-family:inherit;
+      transition:all 0.15s;text-decoration:none;display:inline-flex;align-items:center;gap:6px;
+    }
+    .pb-btn:hover{border-color:rgba(245,166,35,0.6);color:#F5A623;background:rgba(245,166,35,0.08)}
+    .pb-btn-gold{background:#F5A623!important;color:#080808!important;border-color:#F5A623!important;font-weight:600!important}
+    .pb-btn-gold:hover{box-shadow:0 4px 20px rgba(245,166,35,0.4)!important;color:#080808!important}
+    .pb-url{font-size:0.68rem;color:rgba(240,237,232,0.28);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px}
+    .theme-round{width:32px;height:32px;border-radius:50%;border:1px solid rgba(255,255,255,0.18);background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.95rem}
+    .theme-round:hover{border-color:#F5A623}
+
+    /* ── States ── */
+    .state-wrap{min-height:100vh;padding-top:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center;padding:80px 40px 40px}
+    .spinner{width:40px;height:40px;border:3px solid rgba(245,166,35,0.2);border-top-color:#F5A623;border-radius:50%;animation:spin 0.8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .state-title{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;color:#f0ede8}
+    .state-sub{font-size:0.9rem;color:rgba(240,237,232,0.5);max-width:360px;line-height:1.6}
+    .state-btn{display:inline-flex;align-items:center;padding:10px 24px;border-radius:99px;background:#F5A623;color:#080808;font-weight:600;font-size:0.85rem;text-decoration:none;margin-top:8px}
+
+    /* ── Portfolio output wrapper ── */
+    #port-out{padding-top:60px}
+
+    /* ═══════════════════════════════════════════════
+       TEMPLATE STYLES — 7 distinct visual themes
+       Templates map:
+         1-5,8,12-20  → Developer (dark)
+         6,9,21-27    → Designer  (dark/rich)
+         2,10,43-47   → Minimal   (light)
+         5,29-36      → Corporate (dark slate)
+         4,37-42      → Creative  (vibrant)
+         7,48-50      → Academic
+    ═══════════════════════════════════════════════ */
+
+    /* ─────────────────────────────────────────────
+       STYLE A — Obsidian Dark (Developer default)
+       Templates: 1,3,11,12,13,14,15,16,17,18,19,20
+    ───────────────────────────────────────────── */
+    .tA{background:#050508;color:#e8e6e0;font-family:'Plus Jakarta Sans',sans-serif}
+    .tA .p-hero{min-height:92vh;display:flex;flex-direction:column;justify-content:center;padding:80px 8% 60px;position:relative;overflow:hidden}
+    .tA .p-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 20% 60%,rgba(245,166,35,0.07) 0%,transparent 60%);pointer-events:none}
+    .tA .p-role{font-family:'DM Mono',monospace;font-size:0.78rem;letter-spacing:0.22em;text-transform:uppercase;color:#F5A623;margin-bottom:18px;position:relative;z-index:1}
+    .tA .p-name{font-family:'Cormorant Garamond',serif;font-size:clamp(3rem,9vw,8rem);font-weight:300;line-height:0.92;letter-spacing:-0.03em;color:#e8e6e0;margin-bottom:24px;position:relative;z-index:1}
+    .tA .p-about{font-size:1rem;color:rgba(232,230,224,0.55);max-width:500px;line-height:1.75;margin-bottom:36px;position:relative;z-index:1}
+    .tA .p-links{display:flex;gap:10px;flex-wrap:wrap;position:relative;z-index:1}
+    .tA .p-link{padding:8px 18px;border-radius:99px;border:1px solid rgba(245,166,35,0.3);color:#F5A623;font-size:0.8rem;text-decoration:none;transition:background 0.2s}
+    .tA .p-link:hover{background:rgba(245,166,35,0.1)}
+    .tA .p-sec{padding:70px 8%;border-top:1px solid rgba(255,255,255,0.06)}
+    .tA .p-sec-lbl{font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.2em;text-transform:uppercase;color:#F5A623;margin-bottom:36px;display:flex;align-items:center;gap:12px}
+    .tA .p-sec-lbl::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(245,166,35,0.3),transparent)}
+    .tA .p-skills{display:flex;flex-wrap:wrap;gap:10px}
+    .tA .p-skill{padding:7px 18px;border-radius:99px;border:1px solid rgba(255,255,255,0.12);font-size:0.83rem;color:rgba(232,230,224,0.65);cursor:default;transition:all 0.2s}
+    .tA .p-skill:hover{border-color:rgba(245,166,35,0.4);color:#F5A623}
+    .tA .p-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
+    .tA .p-card{padding:26px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;transition:all 0.25s}
+    .tA .p-card:hover{border-color:rgba(245,166,35,0.25);transform:translateY(-4px)}
+    .tA .p-card-t{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:#e8e6e0;margin-bottom:5px}
+    .tA .p-card-m{font-family:'DM Mono',monospace;font-size:0.7rem;color:#F5A623;margin-bottom:10px}
+    .tA .p-card-d{font-size:0.84rem;color:rgba(232,230,224,0.48);line-height:1.65}
+    .tA .p-card-a{display:inline-block;margin-top:12px;font-size:0.78rem;color:#F5A623;text-decoration:underline;text-underline-offset:3px}
+    .tA .p-contact{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
+    .tA .p-ci{padding:18px;border:1px solid rgba(255,255,255,0.08);border-radius:12px;display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;transition:all 0.2s}
+    .tA .p-ci:hover{border-color:rgba(245,166,35,0.3);background:rgba(245,166,35,0.04)}
+    .tA .p-ci-ic{font-size:1.2rem}
+    .tA .p-ci-lb{font-family:'DM Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;color:rgba(232,230,224,0.32)}
+    .tA .p-ci-vl{font-size:0.85rem;color:rgba(232,230,224,0.78);margin-top:2px}
+    .tA .p-footer{text-align:center;padding:40px 8%;border-top:1px solid rgba(255,255,255,0.06)}
+    .tA .p-footer p{font-family:'DM Mono',monospace;font-size:0.6rem;color:rgba(232,230,224,0.16);letter-spacing:0.1em;text-transform:uppercase}
+
+    /* ─────────────────────────────────────────────
+       STYLE B — Neon Terminal (Developer green)
+       Templates: 3,15,20
+    ───────────────────────────────────────────── */
+    .tB{background:#0a0f0a;color:#e0f0e0;font-family:'Space Mono',monospace}
+    .tB .p-hero{min-height:92vh;display:flex;flex-direction:column;justify-content:center;padding:80px 8%;border-bottom:1px solid rgba(0,255,136,0.1)}
+    .tB .p-prompt{color:rgba(0,255,136,0.5);font-size:0.8rem;margin-bottom:12px}
+    .tB .p-role{font-size:0.75rem;color:rgba(0,255,136,0.6);margin-bottom:10px;letter-spacing:0.1em}
+    .tB .p-name{font-size:clamp(2rem,7vw,5.5rem);font-weight:700;color:#00ff88;line-height:1;margin-bottom:20px;text-shadow:0 0 40px rgba(0,255,136,0.3)}
+    .tB .p-about{font-size:0.9rem;color:rgba(224,240,224,0.55);max-width:520px;line-height:1.8;margin-bottom:32px}
+    .tB .p-links{display:flex;gap:10px;flex-wrap:wrap}
+    .tB .p-link{padding:7px 16px;border:1px solid rgba(0,255,136,0.3);color:#00ff88;font-size:0.78rem;text-decoration:none;border-radius:4px;transition:all 0.2s}
+    .tB .p-link:hover{background:rgba(0,255,136,0.08)}
+    .tB .p-sec{padding:60px 8%;border-bottom:1px solid rgba(0,255,136,0.08)}
+    .tB .p-sec-lbl{font-size:0.68rem;letter-spacing:0.18em;text-transform:uppercase;color:rgba(0,255,136,0.5);margin-bottom:28px}
+    .tB .p-sec-lbl::before{content:'// '}
+    .tB .p-skills{display:flex;flex-wrap:wrap;gap:8px}
+    .tB .p-skill{padding:5px 14px;border:1px solid rgba(0,255,136,0.2);color:rgba(0,255,136,0.7);font-size:0.8rem;border-radius:4px}
+    .tB .p-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+    .tB .p-card{padding:22px;background:rgba(0,255,136,0.03);border:1px solid rgba(0,255,136,0.1);border-radius:6px;transition:all 0.2s}
+    .tB .p-card:hover{border-color:rgba(0,255,136,0.3);background:rgba(0,255,136,0.05)}
+    .tB .p-card-t{font-size:1rem;color:#e0f0e0;margin-bottom:5px;font-weight:700}
+    .tB .p-card-m{font-size:0.72rem;color:rgba(0,255,136,0.6);margin-bottom:8px}
+    .tB .p-card-d{font-size:0.82rem;color:rgba(224,240,224,0.45);line-height:1.6}
+    .tB .p-card-a{display:inline-block;margin-top:10px;font-size:0.75rem;color:#00ff88;text-decoration:underline}
+    .tB .p-contact{display:flex;flex-wrap:wrap;gap:14px}
+    .tB .p-ci{display:flex;align-items:center;gap:8px;font-size:0.85rem;color:rgba(0,255,136,0.7);text-decoration:none}
+    .tB .p-footer{text-align:center;padding:40px 8%}
+    .tB .p-footer p{font-size:0.6rem;color:rgba(0,255,136,0.15);letter-spacing:0.1em;text-transform:uppercase}
+
+    /* ─────────────────────────────────────────────
+       STYLE C — Ivory Editorial (Minimal light)
+       Templates: 2,10,43,44,45,46,47
+    ───────────────────────────────────────────── */
+    .tC{background:#faf8f4;color:#1a1612;font-family:'Plus Jakarta Sans',sans-serif}
+    .tC .p-hero{display:grid;grid-template-columns:1fr 1fr;align-items:center;min-height:85vh;padding:80px 8% 60px;gap:60px;max-width:1300px;margin:0 auto}
+    .tC .p-role{font-family:'DM Mono',monospace;font-size:0.7rem;letter-spacing:0.22em;text-transform:uppercase;color:#c4841b;margin-bottom:14px}
+    .tC .p-name{font-family:'Cormorant Garamond',serif;font-size:clamp(2.4rem,5vw,4.5rem);font-weight:600;line-height:1;letter-spacing:-0.02em;color:#1a1612;margin-bottom:22px}
+    .tC .p-about{font-size:0.95rem;color:rgba(26,22,18,0.6);line-height:1.8;margin-bottom:28px}
+    .tC .p-links{display:flex;gap:10px;flex-wrap:wrap}
+    .tC .p-link{padding:8px 20px;border-radius:99px;background:#F5A623;color:#080808;font-size:0.8rem;font-weight:600;text-decoration:none}
+    .tC .p-circle{width:280px;height:280px;border-radius:50%;border:1px solid rgba(26,22,18,0.1);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:5.5rem;font-weight:300;color:rgba(196,132,27,0.22);position:relative;margin:auto}
+    .tC .p-circle::before{content:'';position:absolute;inset:20px;border-radius:50%;border:1px dashed rgba(26,22,18,0.1)}
+    .tC .p-sec{max-width:1300px;margin:0 auto;padding:60px 8%;border-top:1px solid rgba(26,22,18,0.08)}
+    .tC .p-sec-lbl{font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.18em;text-transform:uppercase;color:rgba(26,22,18,0.36);margin-bottom:36px}
+    .tC .p-skills{display:flex;flex-wrap:wrap;gap:8px}
+    .tC .p-skill{padding:6px 14px;border-radius:99px;border:1px solid rgba(26,22,18,0.14);font-size:0.82rem;color:rgba(26,22,18,0.6)}
+    .tC .p-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+    .tC .p-card{padding:24px;background:#fff;border:1px solid rgba(26,22,18,0.09);border-radius:12px;box-shadow:0 2px 10px rgba(0,0,0,0.04)}
+    .tC .p-card-t{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:#1a1612;margin-bottom:5px}
+    .tC .p-card-m{font-family:'DM Mono',monospace;font-size:0.68rem;color:#c4841b;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.06em}
+    .tC .p-card-d{font-size:0.84rem;color:rgba(26,22,18,0.55);line-height:1.65}
+    .tC .p-card-a{display:inline-block;margin-top:10px;font-size:0.78rem;color:#c4841b;text-decoration:underline}
+    .tC .p-contact{display:flex;flex-wrap:wrap;gap:16px}
+    .tC .p-ci{display:flex;align-items:center;gap:8px;font-size:0.9rem;color:#c4841b;text-decoration:none}
+    .tC .p-footer{text-align:center;padding:40px 8%;border-top:1px solid rgba(26,22,18,0.08)}
+    .tC .p-footer p{font-family:'DM Mono',monospace;font-size:0.6rem;color:rgba(26,22,18,0.18);letter-spacing:0.1em;text-transform:uppercase}
+    @media(max-width:700px){.tC .p-hero{grid-template-columns:1fr}.tC .p-circle{display:none}}
+
+    /* ─────────────────────────────────────────────
+       STYLE D — Coral Creative (Vibrant)
+       Templates: 4,37,38,39,40,41,42
+    ───────────────────────────────────────────── */
+    .tD{background:#fff;color:#1a0808;font-family:'Plus Jakarta Sans',sans-serif}
+    .tD .p-hero{min-height:90vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:80px 8% 60px;background:linear-gradient(135deg,#ff6b6b,#ff8e53,#feca57);position:relative;overflow:hidden}
+    .tD .p-hero::before{content:'';position:absolute;inset:0;background:rgba(0,0,0,0.15);pointer-events:none}
+    .tD .p-role{font-family:'DM Mono',monospace;font-size:0.75rem;letter-spacing:0.2em;text-transform:uppercase;color:rgba(255,255,255,0.75);margin-bottom:16px;position:relative;z-index:1}
+    .tD .p-name{font-family:'Playfair Display',serif;font-size:clamp(3rem,8vw,7rem);font-weight:700;color:#fff;line-height:0.95;margin-bottom:22px;text-shadow:0 4px 30px rgba(0,0,0,0.2);position:relative;z-index:1}
+    .tD .p-about{font-size:1rem;color:rgba(255,255,255,0.82);max-width:520px;line-height:1.75;margin-bottom:32px;position:relative;z-index:1}
+    .tD .p-links{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;position:relative;z-index:1}
+    .tD .p-link{padding:9px 22px;border-radius:99px;border:2px solid rgba(255,255,255,0.5);color:#fff;font-size:0.82rem;font-weight:600;text-decoration:none;transition:all 0.2s;backdrop-filter:blur(8px);background:rgba(255,255,255,0.12)}
+    .tD .p-link:hover{background:rgba(255,255,255,0.25)}
+    .tD .p-sec{padding:70px 8%;border-top:1px solid rgba(0,0,0,0.07)}
+    .tD .p-sec-lbl{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:#ff6b6b;margin-bottom:32px;font-style:italic}
+    .tD .p-skills{display:flex;flex-wrap:wrap;gap:10px}
+    .tD .p-skill{padding:7px 16px;border-radius:99px;background:#fff5f5;border:1px solid rgba(255,107,107,0.25);color:#e05050;font-size:0.83rem}
+    .tD .p-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
+    .tD .p-card{padding:28px;background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(255,107,107,0.1);border:1px solid rgba(255,107,107,0.1)}
+    .tD .p-card-t{font-family:'Playfair Display',serif;font-size:1.2rem;color:#1a0808;margin-bottom:5px}
+    .tD .p-card-m{font-size:0.78rem;color:#ff6b6b;margin-bottom:8px;font-weight:600}
+    .tD .p-card-d{font-size:0.84rem;color:rgba(26,8,8,0.55);line-height:1.65}
+    .tD .p-card-a{display:inline-block;margin-top:10px;font-size:0.78rem;color:#ff6b6b;text-decoration:underline}
+    .tD .p-contact{display:flex;flex-wrap:wrap;gap:14px}
+    .tD .p-ci{display:flex;align-items:center;gap:8px;font-size:0.9rem;color:#ff6b6b;text-decoration:none;font-weight:600}
+    .tD .p-footer{text-align:center;padding:40px 8%;border-top:1px solid rgba(0,0,0,0.07)}
+    .tD .p-footer p{font-family:'DM Mono',monospace;font-size:0.6rem;color:rgba(26,8,8,0.2);letter-spacing:0.1em;text-transform:uppercase}
+
+    /* ─────────────────────────────────────────────
+       STYLE E — Navy Corporate (Professional)
+       Templates: 5,29,30,31,32,33,34,35,36
+    ───────────────────────────────────────────── */
+    .tE{background:#f1f5f9;color:#1e293b;font-family:'Plus Jakarta Sans',sans-serif}
+    .tE .p-hero{background:#1e293b;min-height:80vh;display:flex;flex-direction:column;justify-content:center;padding:80px 8% 60px}
+    .tE .p-role{font-size:0.78rem;font-weight:600;color:#38bdf8;margin-bottom:14px;letter-spacing:0.06em;text-transform:uppercase}
+    .tE .p-name{font-family:'Cormorant Garamond',serif;font-size:clamp(2.8rem,7vw,5.5rem);font-weight:300;color:#f1f5f9;margin-bottom:20px;line-height:1.0;letter-spacing:-0.02em}
+    .tE .p-about{font-size:1rem;color:rgba(241,245,249,0.6);max-width:540px;line-height:1.75;margin-bottom:32px}
+    .tE .p-links{display:flex;gap:10px;flex-wrap:wrap}
+    .tE .p-link{padding:9px 22px;border-radius:8px;background:#38bdf8;color:#1e293b;font-size:0.82rem;font-weight:700;text-decoration:none;transition:all 0.2s}
+    .tE .p-link:hover{background:#0ea5e9}
+    .tE .p-sec{padding:60px 8%;border-top:1px solid rgba(30,41,59,0.1)}
+    .tE .p-sec-lbl{font-size:1rem;font-weight:700;color:#1e293b;margin-bottom:28px;padding-left:14px;border-left:4px solid #38bdf8}
+    .tE .p-skills{display:flex;flex-wrap:wrap;gap:8px}
+    .tE .p-skill{padding:6px 14px;border-radius:6px;background:#e0f2fe;color:#0369a1;font-size:0.82rem;font-weight:500}
+    .tE .p-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px}
+    .tE .p-card{padding:24px;background:#fff;border-radius:10px;box-shadow:0 2px 12px rgba(0,0,0,0.06);border:1px solid #e2e8f0}
+    .tE .p-card-t{font-size:1rem;color:#1e293b;font-weight:700;margin-bottom:5px}
+    .tE .p-card-m{font-size:0.8rem;color:#0284c7;font-weight:600;margin-bottom:8px}
+    .tE .p-card-d{font-size:0.84rem;color:#64748b;line-height:1.65}
+    .tE .p-card-a{display:inline-block;margin-top:10px;font-size:0.78rem;color:#0284c7;text-decoration:underline}
+    .tE .p-contact{display:flex;flex-wrap:wrap;gap:14px}
+    .tE .p-ci{display:flex;align-items:center;gap:8px;font-size:0.9rem;color:#0284c7;text-decoration:none;font-weight:600}
+    .tE .p-footer{text-align:center;padding:40px 8%;border-top:1px solid #e2e8f0}
+    .tE .p-footer p{font-family:'DM Mono',monospace;font-size:0.6rem;color:rgba(30,41,59,0.2);letter-spacing:0.1em;text-transform:uppercase}
+
+    /* ─────────────────────────────────────────────
+       STYLE F — Violet Glass (Designer dark)
+       Templates: 6,9,21,22,23,24,25,26,27,28
+    ───────────────────────────────────────────── */
+    .tF{background:#0d0010;color:#f0e8ff;font-family:'Plus Jakarta Sans',sans-serif}
+    .tF .p-hero{min-height:92vh;display:flex;flex-direction:column;justify-content:center;padding:80px 8% 60px;position:relative;overflow:hidden}
+    .tF .p-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 30% 50%,rgba(168,85,247,0.12) 0%,transparent 65%),radial-gradient(ellipse at 70% 80%,rgba(232,121,249,0.08) 0%,transparent 50%);pointer-events:none}
+    .tF .p-role{font-family:'DM Mono',monospace;font-size:0.75rem;letter-spacing:0.22em;text-transform:uppercase;color:#c084fc;margin-bottom:18px;position:relative;z-index:1}
+    .tF .p-name{font-family:'Cormorant Garamond',serif;font-size:clamp(3rem,9vw,8rem);font-weight:300;line-height:0.92;letter-spacing:-0.03em;color:#f0e8ff;margin-bottom:24px;position:relative;z-index:1}
+    .tF .p-about{font-size:1rem;color:rgba(240,232,255,0.55);max-width:480px;line-height:1.75;margin-bottom:36px;position:relative;z-index:1}
+    .tF .p-links{display:flex;gap:10px;flex-wrap:wrap;position:relative;z-index:1}
+    .tF .p-link{padding:8px 18px;border-radius:99px;border:1px solid rgba(192,132,252,0.35);color:#c084fc;font-size:0.8rem;text-decoration:none;transition:background 0.2s;backdrop-filter:blur(8px)}
+    .tF .p-link:hover{background:rgba(192,132,252,0.1)}
+    .tF .p-sec{padding:70px 8%;border-top:1px solid rgba(192,132,252,0.12)}
+    .tF .p-sec-lbl{font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.2em;text-transform:uppercase;color:#c084fc;margin-bottom:36px;display:flex;align-items:center;gap:12px}
+    .tF .p-sec-lbl::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(192,132,252,0.3),transparent)}
+    .tF .p-skills{display:flex;flex-wrap:wrap;gap:10px}
+    .tF .p-skill{padding:7px 18px;border-radius:99px;border:1px solid rgba(192,132,252,0.2);font-size:0.83rem;color:rgba(240,232,255,0.6);cursor:default;transition:all 0.2s}
+    .tF .p-skill:hover{border-color:rgba(192,132,252,0.5);color:#c084fc}
+    .tF .p-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px}
+    .tF .p-card{padding:26px;background:rgba(192,132,252,0.04);border:1px solid rgba(192,132,252,0.12);border-radius:14px;transition:all 0.25s}
+    .tF .p-card:hover{border-color:rgba(192,132,252,0.3);transform:translateY(-4px)}
+    .tF .p-card-t{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:#f0e8ff;margin-bottom:5px}
+    .tF .p-card-m{font-family:'DM Mono',monospace;font-size:0.7rem;color:#c084fc;margin-bottom:10px}
+    .tF .p-card-d{font-size:0.84rem;color:rgba(240,232,255,0.45);line-height:1.65}
+    .tF .p-card-a{display:inline-block;margin-top:12px;font-size:0.78rem;color:#c084fc;text-decoration:underline;text-underline-offset:3px}
+    .tF .p-contact{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
+    .tF .p-ci{padding:18px;border:1px solid rgba(192,132,252,0.12);border-radius:12px;display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;transition:all 0.2s}
+    .tF .p-ci:hover{border-color:rgba(192,132,252,0.35);background:rgba(192,132,252,0.05)}
+    .tF .p-ci-ic{font-size:1.2rem}
+    .tF .p-ci-lb{font-family:'DM Mono',monospace;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;color:rgba(240,232,255,0.3)}
+    .tF .p-ci-vl{font-size:0.85rem;color:rgba(240,232,255,0.75);margin-top:2px}
+    .tF .p-footer{text-align:center;padding:40px 8%;border-top:1px solid rgba(192,132,252,0.1)}
+    .tF .p-footer p{font-family:'DM Mono',monospace;font-size:0.6rem;color:rgba(240,232,255,0.14);letter-spacing:0.1em;text-transform:uppercase}
+
+    /* ─────────────────────────────────────────────
+       STYLE G — Sage Academic (Fresh green)
+       Templates: 7,48,49,50
+    ───────────────────────────────────────────── */
+    .tG{background:#f0fdf4;color:#14532d;font-family:'Plus Jakarta Sans',sans-serif}
+    .tG .p-hero{min-height:80vh;display:flex;flex-direction:column;justify-content:center;padding:80px 8% 60px;background:linear-gradient(135deg,#052e16,#14532d);position:relative;overflow:hidden}
+    .tG .p-hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 80% 40%,rgba(74,222,128,0.1) 0%,transparent 60%);pointer-events:none}
+    .tG .p-role{font-family:'DM Mono',monospace;font-size:0.75rem;letter-spacing:0.22em;text-transform:uppercase;color:#4ade80;margin-bottom:16px;position:relative;z-index:1}
+    .tG .p-name{font-family:'Cormorant Garamond',serif;font-size:clamp(2.8rem,7vw,5.5rem);font-weight:300;color:#f0fdf4;line-height:1;letter-spacing:-0.02em;margin-bottom:22px;position:relative;z-index:1}
+    .tG .p-about{font-size:1rem;color:rgba(240,253,244,0.6);max-width:500px;line-height:1.75;margin-bottom:32px;position:relative;z-index:1}
+    .tG .p-links{display:flex;gap:10px;flex-wrap:wrap;position:relative;z-index:1}
+    .tG .p-link{padding:8px 20px;border-radius:99px;border:1px solid rgba(74,222,128,0.4);color:#4ade80;font-size:0.82rem;text-decoration:none;transition:background 0.2s}
+    .tG .p-link:hover{background:rgba(74,222,128,0.1)}
+    .tG .p-sec{padding:60px 8%;border-top:1px solid rgba(20,83,45,0.12)}
+    .tG .p-sec-lbl{font-family:'DM Mono',monospace;font-size:0.7rem;letter-spacing:0.18em;text-transform:uppercase;color:#16a34a;margin-bottom:32px}
+    .tG .p-skills{display:flex;flex-wrap:wrap;gap:8px}
+    .tG .p-skill{padding:6px 14px;border-radius:99px;background:#dcfce7;border:1px solid rgba(22,163,74,0.2);color:#15803d;font-size:0.82rem}
+    .tG .p-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:16px}
+    .tG .p-card{padding:24px;background:#fff;border:1px solid rgba(20,83,45,0.1);border-radius:12px;box-shadow:0 2px 10px rgba(20,83,45,0.06)}
+    .tG .p-card-t{font-family:'Cormorant Garamond',serif;font-size:1.2rem;color:#14532d;margin-bottom:5px}
+    .tG .p-card-m{font-family:'DM Mono',monospace;font-size:0.68rem;color:#16a34a;margin-bottom:8px;text-transform:uppercase}
+    .tG .p-card-d{font-size:0.84rem;color:rgba(20,83,45,0.55);line-height:1.65}
+    .tG .p-card-a{display:inline-block;margin-top:10px;font-size:0.78rem;color:#16a34a;text-decoration:underline}
+    .tG .p-contact{display:flex;flex-wrap:wrap;gap:14px}
+    .tG .p-ci{display:flex;align-items:center;gap:8px;font-size:0.9rem;color:#16a34a;text-decoration:none;font-weight:600}
+    .tG .p-footer{text-align:center;padding:40px 8%;border-top:1px solid rgba(20,83,45,0.1)}
+    .tG .p-footer p{font-family:'DM Mono',monospace;font-size:0.6rem;color:rgba(20,83,45,0.2);letter-spacing:0.1em;text-transform:uppercase}
+
+    /* ── Shared section animation ── */
+    .p-sec-ani{opacity:0;transform:translateY(20px);transition:opacity 0.7s ease,transform 0.7s ease}
+    .p-sec-ani.visible{opacity:1;transform:translateY(0)}
+
+    /* ── Toast ── */
+    #toast-box{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;align-items:flex-end}
+    .toast{display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:10px;background:#1e1e1e;border:1px solid rgba(240,237,232,0.15);color:#f0ede8;font-size:0.82rem;box-shadow:0 8px 32px rgba(0,0,0,0.5);max-width:300px;animation:slideIn 0.3s ease}
+    @keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+    .toast.ok{border-color:rgba(52,211,153,0.4)}
+
+    /* ── Print ── */
+    @media print{.port-bar,#toast-box{display:none!important}}
+    @media(max-width:600px){.port-bar{flex-direction:column;padding:8px 12px}.pb-left,.pb-right{width:100%;justify-content:center}.pb-url{display:none}}
+  </style>
+</head>
+<body>
+
+<!-- ── Action Bar ── -->
+<div class="port-bar">
+  <div class="pb-left">
+    <a href="dashboard.html" class="pb-btn">← Dashboard</a>
+    <a href="templates.html" class="pb-btn">🎨 Change Template</a>
+    <a href="personal-details.html" class="pb-btn">✏️ Edit Details</a>
+  </div>
+  <div class="pb-right">
+    <span class="pb-url" id="pb-url"></span>
+    <button onclick="copyLink()" class="pb-btn">🔗 Share</button>
+    <a href="resume.html" class="pb-btn pb-btn-gold">📄 Resume</a>
+    <button class="theme-round" id="theme-btn">☀️</button>
+  </div>
+</div>
+
+<!-- ── Loading ── -->
+<div class="state-wrap" id="state-loading">
+  <div class="spinner"></div>
+  <p style="font-size:0.78rem;color:rgba(240,237,232,0.4);letter-spacing:0.08em;margin-top:8px;">Generating your portfolio…</p>
+</div>
+
+<!-- ── Empty ── -->
+<div class="state-wrap" id="state-empty" style="display:none">
+  <div style="font-size:3.5rem">🌐</div>
+  <div class="state-title">Your portfolio is empty</div>
+  <p class="state-sub">Fill in your details first — it only takes a few minutes.</p>
+  <a href="personal-details.html" class="state-btn">Add My Details →</a>
+</div>
+
+<!-- ── Portfolio Output ── -->
+<div id="port-out"></div>
+
+<div id="toast-box"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/script.js"></script>
+<script>
+'use strict';
+let _user = null;
+
+/* ── Helpers ── */
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function safeArr(v){if(Array.isArray(v))return v;try{return JSON.parse(v)||[];}catch{return[]}}
+function initials(n){return(n||'?').trim().split(/\s+/).slice(0,2).map(w=>(w[0]||'').toUpperCase()).join('')||'?'}
+
+/* ── Toast ── */
+function toast(msg,type=''){
+  const b=document.getElementById('toast-box');
+  const t=document.createElement('div');
+  t.className='toast'+(type?' '+type:'');t.textContent=msg;
+  b.appendChild(t);setTimeout(()=>t.remove(),3500);
+}
+
+/* ── Theme ── */
+function applyTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  localStorage.setItem('pc-theme',t);
+  const btn=document.getElementById('theme-btn');
+  if(btn)btn.textContent=t==='dark'?'☀️':'🌙';
+}
+
+/* ── Copy link ── */
+async function copyLink(){
+  if(!_user)return;
+  const url=location.origin+'/portfolio.html?uid='+_user.id;
+  try{await navigator.clipboard.writeText(url);toast('Portfolio link copied! 🔗','ok');}
+  catch{toast('Link: '+url);}
+}
+
+/* ── Template style mapping ── */
+// Returns which CSS class (tA-tG) to use for each template ID
+function getStyle(id){
+  const B=[3,15,20];
+  const C=[2,10,43,44,45,46,47];
+  const D=[4,37,38,39,40,41,42];
+  const E=[5,29,30,31,32,33,34,35,36];
+  const F=[6,9,21,22,23,24,25,26,27,28];
+  const G=[7,48,49,50];
+  if(B.includes(id)) return 'tB';
+  if(C.includes(id)) return 'tC';
+  if(D.includes(id)) return 'tD';
+  if(E.includes(id)) return 'tE';
+  if(F.includes(id)) return 'tF';
+  if(G.includes(id)) return 'tG';
+  return 'tA'; // Default: developer dark (1,8,11,12,13,14,16,17,18,19)
+}
+
+/* ── Build sections ── */
+// Generic card builder works for all styles
+function buildCards(style, items, titleF, metaF, descF, linkF){
+  if(!items||!items.length) return `<p style="opacity:0.35;font-size:0.87rem;">None added yet.</p>`;
+  return items.map(item=>`
+    <div class="${style} p-card">
+      <div class="p-card-t">${esc(titleF(item)||'—')}</div>
+      <div class="p-card-m">${esc(metaF(item)||'')}</div>
+      <div class="p-card-d">${esc(descF(item)||'')}</div>
+      ${linkF&&linkF(item)?`<a href="${esc(linkF(item))}" target="_blank" class="p-card-a">View →</a>`:''}
+    </div>`).join('');
+}
+
+/* ── Render contact for complex styles (tA, tF) ── */
+function renderContactComplex(d, style){
+  const items=[
+    d.email    && {ic:'✉',lb:'Email',vl:d.email,href:'mailto:'+d.email},
+    d.phone    && {ic:'📞',lb:'Phone',vl:d.phone,href:'tel:'+d.phone},
+    d.github   && {ic:'⌥',lb:'GitHub',vl:d.github.replace(/https?:\/\/(www\.)?/,''),href:d.github},
+    d.linkedin && {ic:'in',lb:'LinkedIn',vl:d.linkedin.replace(/https?:\/\/(www\.)?/,''),href:d.linkedin},
+  ].filter(Boolean);
+  return items.map(c=>`
+    <a href="${esc(c.href)}" target="_blank" class="${style} p-ci">
+      <span class="p-ci-ic">${c.ic}</span>
+      <div><div class="p-ci-lb">${c.lb}</div><div class="p-ci-vl">${esc(c.vl)}</div></div>
+    </a>`).join('');
+}
+
+/* ── Render simple inline contact (tB,tC,tD,tE,tG) ── */
+function renderContactSimple(d, style){
+  return [
+    d.email    && `<a href="mailto:${esc(d.email)}"    class="${style} p-ci">✉ ${esc(d.email)}</a>`,
+    d.phone    && `<a href="tel:${esc(d.phone)}"       class="${style} p-ci">📞 ${esc(d.phone)}</a>`,
+    d.github   && `<a href="${esc(d.github)}" target="_blank" class="${style} p-ci">⌥ GitHub</a>`,
+    d.linkedin && `<a href="${esc(d.linkedin)}" target="_blank" class="${style} p-ci">in LinkedIn</a>`,
+  ].filter(Boolean).join('');
+}
+
+/* ── Build links ── */
+function buildLinks(d, style){
+  return [
+    d.email    && `<a href="mailto:${esc(d.email)}"            class="${style} p-link">✉ Email</a>`,
+    d.github   && `<a href="${esc(d.github)}" target="_blank"   class="${style} p-link">⌥ GitHub</a>`,
+    d.linkedin && `<a href="${esc(d.linkedin)}" target="_blank" class="${style} p-link">in LinkedIn</a>`,
+    d.phone    && `<a href="tel:${esc(d.phone)}"               class="${style} p-link">📞 ${esc(d.phone)}</a>`,
+  ].filter(Boolean).join('');
+}
+
+/* ── Main portfolio renderer ── */
+function renderPortfolio(d, tmplId){
+  const style  = getStyle(tmplId);
+  const edu    = safeArr(d.education);
+  const exp    = safeArr(d.experience);
+  const projs  = safeArr(d.projects);
+  const skills = safeArr(d.skills);
+  const certs  = safeArr(d.certifications);
+
+  const skillsHtml = skills.length
+    ? skills.map(s=>`<span class="${style} p-skill">${esc(s)}</span>`).join('')
+    : '<p style="opacity:0.35;font-size:0.87rem;">No skills added yet.</p>';
+
+  const expHtml   = buildCards(style, exp,   e=>e.role,    e=>(e.company||'')+(e.from?' · '+e.from:'')+(e.to?' – '+e.to:''),  e=>e.description);
+  const eduHtml   = buildCards(style, edu,   e=>e.degree,  e=>(e.institution||'')+(e.year?' · '+e.year:'')+(e.grade?' · '+e.grade:''), e=>e.description);
+  const projHtml  = buildCards(style, projs, p=>p.name,    p=>p.tech, p=>p.description, p=>p.url);
+  const certHtml  = certs.length ? buildCards(style, certs, c=>c.title, c=>(c.issuer||'')+(c.year?' · '+c.year:''), ()=>'', c=>c.url) : '';
+
+  const links     = buildLinks(d, style);
+  const contactHtml = (style==='tA'||style==='tF') ? renderContactComplex(d,style) : renderContactSimple(d,style);
+
+  // Hero extras for style C (ivory) — needs initials circle
+  const heroExtra = style==='tC' ? `<div class="${style} p-circle">${initials(d.name||'P')}</div>` : '';
+
+  // Hero extra for style B (terminal)
+  const terminalPrompt = style==='tB' ? `<div class="${style} p-prompt">portfolio@local:~$</div>` : '';
+
+  const html = `
+    <div class="${style}">
+      <!-- ── HERO ── -->
+      <div class="${style} p-hero">
+        ${terminalPrompt}
+        <div class="${style} p-role">${esc(d.portfolio_title||'Professional')}</div>
+        <h1 class="${style} p-name">${esc(d.name||'Your Name')}</h1>
+        ${d.about ? `<p class="${style} p-about">${esc(d.about)}</p>` : ''}
+        <div class="${style} p-links">${links}</div>
+        ${heroExtra}
+      </div>
+
+      <!-- ── SKILLS ── -->
+      ${skills.length ? `
+      <div class="${style} p-sec p-sec-ani">
+        <div class="${style} p-sec-lbl">Skills</div>
+        <div class="${style} p-skills">${skillsHtml}</div>
+      </div>` : ''}
+
+      <!-- ── EXPERIENCE ── -->
+      <div class="${style} p-sec p-sec-ani">
+        <div class="${style} p-sec-lbl">Experience</div>
+        <div class="${style} p-grid">${expHtml}</div>
+      </div>
+
+      <!-- ── EDUCATION ── -->
+      <div class="${style} p-sec p-sec-ani">
+        <div class="${style} p-sec-lbl">Education</div>
+        <div class="${style} p-grid">${eduHtml}</div>
+      </div>
+
+      <!-- ── PROJECTS ── -->
+      <div class="${style} p-sec p-sec-ani">
+        <div class="${style} p-sec-lbl">Projects</div>
+        <div class="${style} p-grid">${projHtml}</div>
+      </div>
+
+      <!-- ── CERTIFICATIONS ── -->
+      ${certHtml ? `
+      <div class="${style} p-sec p-sec-ani">
+        <div class="${style} p-sec-lbl">Certifications</div>
+        <div class="${style} p-grid">${certHtml}</div>
+      </div>` : ''}
+
+      <!-- ── CONTACT ── -->
+      <div class="${style} p-sec p-sec-ani">
+        <div class="${style} p-sec-lbl">Contact</div>
+        <div class="${style} p-contact">${contactHtml}</div>
+      </div>
+
+      <!-- ── FOOTER ── -->
+      <div class="${style} p-footer">
+        <p>Built with PortfolioCraft · ${new Date().getFullYear()}</p>
+      </div>
+    </div>`;
+
+  document.getElementById('port-out').innerHTML = html;
+  document.title = (d.name||'Portfolio') + ' — PortfolioCraft';
+
+  // Trigger scroll animations
+  const observer = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');observer.unobserve(e.target);}});
+  },{threshold:0.08,rootMargin:'0px 0px -50px 0px'});
+  document.querySelectorAll('.p-sec-ani').forEach(el=>observer.observe(el));
+}
+
+/* ── Main ── */
+async function init(){
+  applyTheme(localStorage.getItem('pc-theme')||'dark');
+  document.getElementById('theme-btn')?.addEventListener('click',()=>{
+    applyTheme((document.documentElement.getAttribute('data-theme')||'dark')==='dark'?'light':'dark');
+  });
+
+  // Auth
+  try{_user=await Auth.requireAuth('login.html');}
+  catch(e){window.location.href='login.html';return;}
+  if(!_user)return;
+
+  document.getElementById('pb-url').textContent = location.origin+'/portfolio.html?uid='+_user.id;
+
+  // Fetch data
+  let data=null;
+  try{
+    const{data:d,error}=await DB.getDetails(_user.id);
+    if(!error)data=d;
+  }catch(e){console.warn('DB error:',e);}
+
+  // Hide loading
+  document.getElementById('state-loading').style.display='none';
+
+  if(!data||!data.name){
+    document.getElementById('state-empty').style.display='flex';
+    return;
+  }
+
+  const tmplId=data.selected_template||1;
+  renderPortfolio(data,tmplId);
+}
+
+init().catch(err=>{
+  console.error('Portfolio error:',err);
+  document.getElementById('state-loading').style.display='none';
+  document.getElementById('state-empty').style.display='flex';
+});
+</script>
+</body>
+</html>

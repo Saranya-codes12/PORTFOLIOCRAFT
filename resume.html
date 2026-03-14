@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resume — FolioAI</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600&family=DM+Mono:wght@300;400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: #0f0f0f; min-height: 100vh; }
+
+    /* ── Action bar ── */
+    .res-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 900;
+      padding: 10px 24px; background: rgba(8,8,8,0.92); backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(240,237,232,0.08);
+      display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+    }
+    .rb-left  { display: flex; align-items: center; gap: 8px; }
+    .rb-right { display: flex; align-items: center; gap: 8px; }
+    .rb-btn {
+      padding: 7px 16px; border-radius: 99px; border: 1px solid rgba(240,237,232,0.2);
+      background: rgba(255,255,255,0.06); color: rgba(240,237,232,0.8); font-size: 0.78rem;
+      font-weight: 500; cursor: pointer; font-family: inherit;
+      transition: all 0.15s; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .rb-btn:hover { border-color: rgba(245,166,35,0.5); color: #F5A623; background: rgba(245,166,35,0.06); }
+    .rb-btn-primary { background: #F5A623 !important; color: #080808 !important; border-color: #F5A623 !important; }
+    .rb-btn-primary:hover { box-shadow: 0 4px 20px rgba(245,166,35,0.3); }
+    .icon-btn { width: 34px; height: 34px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 0.95rem; }
+    .icon-btn:hover { border-color: #F5A623; }
+
+    /* ── Loading / empty ── */
+    #loading-wrap { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
+    .spinner { width: 38px; height: 38px; border: 3px solid rgba(245,166,35,0.2); border-top-color: #F5A623; border-radius: 50%; animation: spin 0.8s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .load-txt { font-size: 0.78rem; color: rgba(240,237,232,0.4); }
+    #empty-wrap { min-height: 100vh; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 40px; text-align: center; }
+    #empty-wrap h2 { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 300; color: #f0ede8; }
+    #empty-wrap p { font-size: 0.9rem; color: rgba(240,237,232,0.5); max-width: 360px; line-height: 1.6; }
+
+    /* ── Outer wrapper (screen only) ── */
+    .res-outer-wrap { padding: 80px 24px 60px; display: none; }
+    .res-controls { max-width: 820px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .res-controls h2 { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 300; color: #f0ede8; }
+    .res-controls p { font-size: 0.72rem; color: rgba(240,237,232,0.35); margin-top: 3px; }
+
+    /* ── Resume Document ── */
+    .resume-doc {
+      max-width: 820px; margin: 0 auto;
+      background: #fff; color: #1a1612;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+      border-radius: 4px; overflow: hidden;
+    }
+
+    /* Header */
+    .r-header { padding: 44px 52px 32px; border-bottom: 2px solid #1a1612; }
+    .r-name { font-family: 'Cormorant Garamond', serif; font-size: 2.8rem; font-weight: 300; letter-spacing: -0.02em; color: #1a1612; line-height: 1; margin-bottom: 6px; }
+    .r-role { font-family: 'DM Mono', monospace; font-size: 0.72rem; letter-spacing: 0.2em; text-transform: uppercase; color: #c4841b; margin-bottom: 18px; }
+    .r-contacts { display: flex; flex-wrap: wrap; gap: 16px; }
+    .r-ci { display: flex; align-items: center; gap: 5px; font-size: 0.78rem; color: rgba(26,22,18,0.58); font-family: 'DM Mono', monospace; }
+
+    /* Body grid */
+    .r-body { display: grid; grid-template-columns: 1fr 190px; }
+    .r-main { padding: 32px 40px 48px 52px; border-right: 1px solid rgba(26,22,18,0.1); }
+    .r-side { padding: 32px 22px 48px; background: #faf8f4; }
+
+    /* Section */
+    .r-sec { margin-bottom: 28px; }
+    .r-sec:last-child { margin-bottom: 0; }
+    .r-sec-title { font-family: 'DM Mono', monospace; font-size: 0.62rem; letter-spacing: 0.22em; text-transform: uppercase; color: #c4841b; margin-bottom: 14px; padding-bottom: 7px; border-bottom: 1px solid rgba(26,22,18,0.1); }
+
+    /* Items */
+    .r-item { margin-bottom: 18px; }
+    .r-item:last-child { margin-bottom: 0; }
+    .r-item-head { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 6px; margin-bottom: 3px; }
+    .r-item-title { font-weight: 700; font-size: 0.9rem; color: #1a1612; }
+    .r-item-date { font-family: 'DM Mono', monospace; font-size: 0.66rem; color: rgba(26,22,18,0.42); }
+    .r-item-sub { font-size: 0.82rem; color: #c4841b; font-weight: 600; margin-bottom: 5px; }
+    .r-item-desc { font-size: 0.8rem; color: rgba(26,22,18,0.58); line-height: 1.65; }
+    .r-item-link { font-size: 0.75rem; color: #c4841b; text-decoration: underline; display: inline-block; margin-top: 5px; }
+
+    /* Summary */
+    .r-summary { font-size: 0.84rem; color: rgba(26,22,18,0.65); line-height: 1.75; }
+
+    /* Sidebar skills */
+    .r-skill { display: flex; align-items: center; gap: 7px; font-size: 0.78rem; color: rgba(26,22,18,0.65); margin-bottom: 7px; }
+    .r-sk-dot { width: 4px; height: 4px; border-radius: 50%; background: #c4841b; flex-shrink: 0; }
+
+    /* Footer */
+    .r-footer { text-align: center; padding: 14px 52px; border-top: 1px solid rgba(26,22,18,0.06); background: #faf8f4; }
+    .r-footer p { font-family: 'DM Mono', monospace; font-size: 0.58rem; color: rgba(26,22,18,0.2); letter-spacing: 0.12em; text-transform: uppercase; }
+
+    /* Toast */
+    #toast-box { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+    .toast { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 10px; background: #1e1e1e; border: 1px solid rgba(240,237,232,0.15); color: #f0ede8; font-size: 0.82rem; box-shadow: 0 8px 32px rgba(0,0,0,0.5); max-width: 300px; animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
+
+    /* ── PRINT STYLES ── */
+    @media print {
+      .res-bar, #toast-box, .res-controls, #loading-wrap, #empty-wrap { display: none !important; }
+      body { background: #fff !important; padding: 0 !important; margin: 0 !important; }
+      .res-outer-wrap { padding: 0 !important; display: block !important; }
+      .resume-doc { box-shadow: none !important; border-radius: 0 !important; max-width: 100% !important; margin: 0 !important; }
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+      @page { margin: 0; size: A4; }
+    }
+
+    @media (max-width: 700px) {
+      .r-body { grid-template-columns: 1fr; }
+      .r-side { display: none; }
+      .r-header { padding: 28px 28px 20px; }
+      .r-main { padding: 20px 28px 36px; }
+      .res-bar { flex-direction: column; padding: 10px 14px; }
+      .rb-left, .rb-right { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Action bar -->
+<div class="res-bar" id="res-bar">
+  <div class="rb-left">
+    <a href="dashboard.html" class="rb-btn">← Dashboard</a>
+    <a href="personal-details.html" class="rb-btn">✏️ Edit Details</a>
+    <a href="portfolio.html" class="rb-btn">🌐 Portfolio</a>
+  </div>
+  <div class="rb-right">
+    <button onclick="window.print()" class="rb-btn rb-btn-primary">⬇ Download PDF</button>
+    <button class="icon-btn" id="theme-btn">☀️</button>
+  </div>
+</div>
+
+<!-- Loading -->
+<div id="loading-wrap">
+  <div class="spinner"></div>
+  <div class="load-txt">Building your resume…</div>
+</div>
+
+<!-- Empty -->
+<div id="empty-wrap">
+  <div style="font-size:3.5rem;">📄</div>
+  <h2>No profile data found</h2>
+  <p>Please fill in your personal details first to generate your resume.</p>
+  <a href="personal-details.html" class="rb-btn rb-btn-primary" style="margin-top:8px;">Add My Details →</a>
+</div>
+
+<!-- Resume wrapper (shown after load) -->
+<div class="res-outer-wrap" id="res-outer">
+  <div class="res-controls" id="res-controls">
+    <div>
+      <h2>Resume Preview</h2>
+      <p>Click "Download PDF" to save · ATS-optimised layout</p>
+    </div>
+    <button onclick="window.print()" class="rb-btn rb-btn-primary">⬇ Download PDF</button>
+  </div>
+  <!-- The printable resume -->
+  <div class="resume-doc" id="res-doc"></div>
+</div>
+
+<div id="toast-box"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/script.js"></script>
+<script>
+'use strict';
+
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function safeArr(v) { if(Array.isArray(v)) return v; try{return JSON.parse(v)||[];}catch{return [];} }
+function initials(n) { return (n||'?').trim().split(/\s+/).slice(0,2).map(w=>(w[0]||'').toUpperCase()).join('')||'?'; }
+
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('pc-theme', t);
+  const btn = document.getElementById('theme-btn');
+  if (btn) btn.textContent = t==='dark' ? '☀️' : '🌙';
+}
+
+// ── Build resume HTML ──
+function buildResume(d) {
+  const edu   = safeArr(d.education);
+  const exp   = safeArr(d.experience);
+  const projs = safeArr(d.projects);
+  const skills= safeArr(d.skills);
+  const certs = safeArr(d.certifications);
+
+  document.title = (d.name || 'Resume') + ' — PortfolioCraft';
+
+  const expHtml = exp.map(e => `
+    <div class="r-item">
+      <div class="r-item-head">
+        <span class="r-item-title">${esc(e.role||'Role')}</span>
+        <span class="r-item-date">${esc(e.from||'')}${e.to ? ' – '+esc(e.to) : ''}</span>
+      </div>
+      ${e.company ? `<div class="r-item-sub">${esc(e.company)}</div>` : ''}
+      ${e.description ? `<div class="r-item-desc">${esc(e.description)}</div>` : ''}
+    </div>`).join('');
+
+  const eduHtml = edu.map(e => `
+    <div class="r-item">
+      <div class="r-item-head">
+        <span class="r-item-title">${esc(e.degree||'Degree')}</span>
+        <span class="r-item-date">${esc(e.year||'')}</span>
+      </div>
+      ${e.institution ? `<div class="r-item-sub">${esc(e.institution)}${e.grade?' · '+esc(e.grade):''}</div>` : ''}
+      ${e.description ? `<div class="r-item-desc">${esc(e.description)}</div>` : ''}
+    </div>`).join('');
+
+  const projHtml = projs.map(p => `
+    <div class="r-item">
+      <div class="r-item-head">
+        <span class="r-item-title">${esc(p.name||'Project')}</span>
+        ${p.url ? `<a href="${esc(p.url)}" class="r-item-link" target="_blank">View →</a>` : ''}
+      </div>
+      ${p.tech ? `<div class="r-item-sub">${esc(p.tech)}</div>` : ''}
+      ${p.description ? `<div class="r-item-desc">${esc(p.description)}</div>` : ''}
+    </div>`).join('');
+
+  const certHtml = certs.map(c => `
+    <div class="r-item">
+      <div class="r-item-head">
+        <span class="r-item-title">${esc(c.title||'Certificate')}</span>
+        <span class="r-item-date">${esc(c.year||'')}</span>
+      </div>
+      ${c.issuer ? `<div class="r-item-sub">${esc(c.issuer)}</div>` : ''}
+      ${c.url ? `<a href="${esc(c.url)}" class="r-item-link" target="_blank">View Credential →</a>` : ''}
+    </div>`).join('');
+
+  const skillsSideHtml = skills.slice(0, 18).map(s =>
+    `<div class="r-skill"><div class="r-sk-dot"></div>${esc(s)}</div>`
+  ).join('');
+
+  document.getElementById('res-doc').innerHTML = `
+    <!-- HEADER -->
+    <div class="r-header">
+      <div class="r-name">${esc(d.name||'Your Name')}</div>
+      ${d.portfolio_title ? `<div class="r-role">${esc(d.portfolio_title)}</div>` : ''}
+      <div class="r-contacts">
+        ${d.email    ? `<div class="r-ci"><span>✉</span>${esc(d.email)}</div>` : ''}
+        ${d.phone    ? `<div class="r-ci"><span>📞</span>${esc(d.phone)}</div>` : ''}
+        ${d.github   ? `<div class="r-ci"><span>⌥</span>${esc(d.github.replace(/https?:\/\/(www\.)?/,''))}</div>` : ''}
+        ${d.linkedin ? `<div class="r-ci"><span>in</span>${esc(d.linkedin.replace(/https?:\/\/(www\.)?/,''))}</div>` : ''}
+      </div>
+    </div>
+
+    <!-- BODY -->
+    <div class="r-body">
+      <!-- Main column -->
+      <div class="r-main">
+        ${d.about ? `
+        <div class="r-sec">
+          <div class="r-sec-title">Summary</div>
+          <p class="r-summary">${esc(d.about)}</p>
+        </div>` : ''}
+
+        ${exp.length ? `
+        <div class="r-sec">
+          <div class="r-sec-title">Work Experience</div>
+          ${expHtml}
+        </div>` : ''}
+
+        ${projs.length ? `
+        <div class="r-sec">
+          <div class="r-sec-title">Projects</div>
+          ${projHtml}
+        </div>` : ''}
+
+        ${edu.length ? `
+        <div class="r-sec">
+          <div class="r-sec-title">Education</div>
+          ${eduHtml}
+        </div>` : ''}
+
+        ${certs.length ? `
+        <div class="r-sec">
+          <div class="r-sec-title">Certifications</div>
+          ${certHtml}
+        </div>` : ''}
+      </div>
+
+      <!-- Sidebar column -->
+      <div class="r-side">
+        ${skills.length ? `
+        <div class="r-sec">
+          <div class="r-sec-title">Skills</div>
+          ${skillsSideHtml}
+        </div>` : ''}
+
+        ${(d.github || d.linkedin) ? `
+        <div class="r-sec">
+          <div class="r-sec-title">Links</div>
+          ${d.github   ? `<div class="r-skill"><div class="r-sk-dot"></div>GitHub</div>` : ''}
+          ${d.linkedin ? `<div class="r-skill"><div class="r-sk-dot"></div>LinkedIn</div>` : ''}
+        </div>` : ''}
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="r-footer">
+      <p>Generated with PortfolioCraft · ${new Date().toLocaleDateString('en-US',{month:'long',year:'numeric'})}</p>
+    </div>
+  `;
+}
+
+// ── Main ──
+async function init() {
+  applyTheme(localStorage.getItem('pc-theme') || 'dark');
+  document.getElementById('theme-btn')?.addEventListener('click', () => {
+    applyTheme((document.documentElement.getAttribute('data-theme')||'dark')==='dark' ? 'light' : 'dark');
+  });
+
+  // Auth
+  let user;
+  try { user = await Auth.requireAuth('login.html'); }
+  catch(e) { window.location.href = 'login.html'; return; }
+  if (!user) return;
+
+  // Fetch data
+  let data = null;
+  try {
+    const { data: d, error } = await DB.getDetails(user.id);
+    if (!error) data = d;
+  } catch(e) { console.warn('DB error:', e); }
+
+  // Hide loading
+  document.getElementById('loading-wrap').style.display = 'none';
+
+  if (!data || !data.name) {
+    document.getElementById('empty-wrap').style.display = 'flex';
+    return;
+  }
+
+  // Show resume
+  document.getElementById('res-outer').style.display = 'block';
+  buildResume(data);
+}
+
+init().catch(err => {
+  console.error('Resume init error:', err);
+  document.getElementById('loading-wrap').style.display = 'none';
+  document.getElementById('empty-wrap').style.display = 'flex';
+});
+</script>
+</body>
+</html>

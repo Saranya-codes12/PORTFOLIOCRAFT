@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Details — FolioAI</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* ── Base ── */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: #080808; color: #f0ede8; }
+
+    /* ── Layout ── */
+    .dash-layout { display: flex; min-height: 100vh; }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: 260px; flex-shrink: 0; position: fixed; top: 0; left: 0; bottom: 0;
+      background: #0f0f0f; border-right: 1px solid rgba(240,237,232,0.08);
+      display: flex; flex-direction: column; z-index: 500;
+      transition: transform 0.3s ease;
+    }
+    .sidebar-header {
+      padding: 24px 20px 20px; border-bottom: 1px solid rgba(240,237,232,0.08);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .sidebar-logo {
+      font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 600;
+      display: flex; align-items: center; gap: 10px; text-decoration: none; color: #f0ede8;
+    }
+    .logo-mark {
+      width: 30px; height: 30px; background: #F5A623; border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; font-weight: 700; color: #080808; flex-shrink: 0;
+    }
+    .sb-close {
+      display: none; width: 28px; height: 28px; border-radius: 50%;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      align-items: center; justify-content: center; cursor: pointer; font-size: 0.75rem; color: rgba(240,237,232,0.6);
+    }
+    .sb-nav { flex: 1; padding: 16px 10px; overflow-y: auto; }
+    .sb-sec {
+      font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(240,237,232,0.25); padding: 0 10px; margin: 20px 0 6px;
+    }
+    .sb-sec:first-child { margin-top: 0; }
+    .sb-link {
+      display: flex; align-items: center; gap: 10px; padding: 10px;
+      border-radius: 6px; font-size: 0.875rem; font-weight: 500;
+      color: rgba(240,237,232,0.55); transition: all 0.15s; cursor: pointer;
+      text-decoration: none; position: relative; border: 1px solid transparent;
+    }
+    .sb-link .ni { width: 18px; text-align: center; font-size: 1rem; flex-shrink: 0; }
+    .sb-link .nb {
+      margin-left: auto; background: #F5A623; color: #080808;
+      font-size: 0.58rem; font-weight: 700; padding: 1px 6px; border-radius: 99px;
+    }
+    .sb-link:hover { background: rgba(255,255,255,0.05); color: #f0ede8; }
+    .sb-link.active { background: rgba(245,166,35,0.1); color: #F5A623; border-color: rgba(245,166,35,0.25); }
+    .sb-link.active::before {
+      content: ''; position: absolute; left: -10px; top: 50%;
+      transform: translateY(-50%); width: 3px; height: 18px;
+      background: #F5A623; border-radius: 0 99px 99px 0;
+    }
+    .sb-footer { padding: 12px 10px; border-top: 1px solid rgba(240,237,232,0.08); }
+    .user-card {
+      display: flex; align-items: center; gap: 10px; padding: 10px;
+      border-radius: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    }
+    .user-av {
+      width: 34px; height: 34px; border-radius: 50%; background: #F5A623;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; font-weight: 700; color: #080808; flex-shrink: 0;
+    }
+    .user-nm { font-size: 0.8rem; font-weight: 600; color: #f0ede8; }
+    .user-em { font-size: 0.67rem; color: rgba(240,237,232,0.35); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 160px; }
+    .sb-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 499; }
+    .sb-overlay.show { display: block; }
+
+    /* ── Main ── */
+    .main-area { flex: 1; margin-left: 260px; display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* ── Topbar ── */
+    .topbar {
+      position: sticky; top: 0; height: 62px; padding: 0 28px;
+      background: rgba(8,8,8,0.9); backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(240,237,232,0.08);
+      display: flex; align-items: center; justify-content: space-between; z-index: 400;
+    }
+    .topbar-title { font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; font-weight: 300; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .autosave-ind { display: flex; align-items: center; gap: 6px; font-size: 0.72rem; color: rgba(240,237,232,0.4); }
+    .as-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(240,237,232,0.3); transition: background 0.3s; }
+    .as-dot.saved { background: #34d399; }
+    .as-dot.saving { background: #F5A623; animation: blink 1s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .btn-amber {
+      background: #F5A623; color: #080808; border: none; padding: 9px 20px; border-radius: 99px;
+      font-size: 0.82rem; font-weight: 600; cursor: pointer; font-family: inherit;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+    .btn-amber:hover { box-shadow: 0 6px 24px rgba(245,166,35,0.35); transform: translateY(-1px); }
+    .btn-outline {
+      background: transparent; color: rgba(240,237,232,0.7); border: 1px solid rgba(255,255,255,0.2);
+      padding: 8px 16px; border-radius: 99px; font-size: 0.78rem; font-weight: 500;
+      cursor: pointer; font-family: inherit; transition: border-color 0.15s, color 0.15s;
+      text-decoration: none; display: inline-flex; align-items: center;
+    }
+    .btn-outline:hover { border-color: #F5A623; color: #F5A623; }
+    .icon-btn {
+      width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 1rem; transition: border-color 0.15s, transform 0.2s;
+    }
+    .icon-btn:hover { border-color: #F5A623; transform: rotate(20deg); }
+    .ham-btn {
+      display: none; width: 36px; height: 36px; border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05);
+      align-items: center; justify-content: center; cursor: pointer; font-size: 1.1rem;
+    }
+
+    /* ── Page body ── */
+    .page-body { padding: 28px 28px 60px; }
+
+    /* ── Two column layout ── */
+    .details-wrap { display: grid; grid-template-columns: 1fr 320px; gap: 24px; align-items: start; }
+
+    /* ── Form section card ── */
+    .fsec {
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(240,237,232,0.1);
+      border-radius: 14px; overflow: hidden; margin-bottom: 18px;
+    }
+    .fsec-head {
+      padding: 16px 22px; border-bottom: 1px solid rgba(240,237,232,0.08);
+      display: flex; align-items: center; gap: 12px;
+    }
+    .fsec-icon {
+      width: 34px; height: 34px; border-radius: 8px; flex-shrink: 0;
+      background: rgba(245,166,35,0.1); border: 1px solid rgba(245,166,35,0.25);
+      display: flex; align-items: center; justify-content: center; font-size: 1rem;
+    }
+    .fsec-title { font-family: 'Cormorant Garamond', serif; font-size: 1.05rem; font-weight: 400; color: #f0ede8; }
+    .fsec-sub { font-size: 0.72rem; color: rgba(240,237,232,0.4); margin-top: 2px; }
+    .fsec-body { padding: 22px; }
+
+    /* ── Form inputs (FIXED floating labels) ── */
+    .form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 0; }
+
+    .fg {
+      position: relative; margin-bottom: 16px;
+    }
+    .fg label {
+      display: block;
+      font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em;
+      text-transform: uppercase; color: rgba(240,237,232,0.5);
+      margin-bottom: 7px;
+    }
+    .fg input, .fg textarea, .fg select {
+      width: 100%; padding: 11px 14px;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(240,237,232,0.12);
+      border-radius: 9px; color: #f0ede8; font-size: 0.9rem;
+      font-family: inherit; outline: none;
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    }
+    .fg input:focus, .fg textarea:focus {
+      border-color: #F5A623; background: rgba(255,255,255,0.07);
+      box-shadow: 0 0 0 3px rgba(245,166,35,0.12);
+    }
+    .fg input::placeholder, .fg textarea::placeholder { color: rgba(240,237,232,0.2); }
+    .fg textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+
+    /* ── Skills ── */
+    .skills-area {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(240,237,232,0.12);
+      border-radius: 9px; padding: 10px; min-height: 50px;
+      display: flex; flex-wrap: wrap; gap: 7px; align-items: flex-start;
+      cursor: text; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .skills-area:focus-within { border-color: #F5A623; box-shadow: 0 0 0 3px rgba(245,166,35,0.12); }
+    .skill-pill {
+      display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px;
+      border-radius: 99px; background: rgba(245,166,35,0.12); border: 1px solid rgba(245,166,35,0.3);
+      color: #F5A623; font-size: 0.78rem; font-weight: 500; animation: popIn 0.2s ease;
+    }
+    @keyframes popIn { from{transform:scale(0.7);opacity:0} to{transform:scale(1);opacity:1} }
+    .skill-pill button {
+      background: none; border: none; cursor: pointer; color: #F5A623;
+      opacity: 0.6; font-size: 0.7rem; padding: 0; line-height: 1;
+    }
+    .skill-pill button:hover { opacity: 1; }
+    .skill-input {
+      background: none; border: none; outline: none; color: #f0ede8;
+      font-size: 0.88rem; font-family: inherit; min-width: 120px; flex: 1; padding: 2px 4px;
+    }
+    .skill-input::placeholder { color: rgba(240,237,232,0.25); }
+
+    /* ── Repeatable items ── */
+    .repeat-list { display: flex; flex-direction: column; gap: 14px; }
+    .repeat-item {
+      background: rgba(255,255,255,0.03); border: 1px solid rgba(240,237,232,0.1);
+      border-radius: 10px; padding: 18px 44px 18px 18px; position: relative;
+    }
+    .repeat-item:hover { border-color: rgba(240,237,232,0.18); }
+    .rr {
+      position: absolute; top: 12px; right: 12px;
+      width: 26px; height: 26px; border-radius: 50%;
+      background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.3);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 0.7rem; color: #ff9999;
+      transition: background 0.15s;
+    }
+    .rr:hover { background: rgba(255,107,107,0.2); }
+    .add-btn {
+      display: flex; align-items: center; gap: 7px; padding: 9px 14px; margin-top: 12px;
+      border-radius: 8px; border: 1px dashed rgba(240,237,232,0.2);
+      background: transparent; color: rgba(240,237,232,0.4); font-size: 0.82rem;
+      font-family: inherit; cursor: pointer; width: 100%; transition: all 0.15s;
+    }
+    .add-btn:hover { border-color: #F5A623; color: #F5A623; }
+
+    /* ── Live preview panel ── */
+    .preview-panel { position: sticky; top: 84px; }
+    .prev-label { font-size: 0.62rem; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(240,237,232,0.3); margin-bottom: 10px; }
+    .prev-frame { background: #0a0a0a; border: 1px solid rgba(240,237,232,0.1); border-radius: 12px; overflow: hidden; }
+    .prev-chrome { background: #161616; padding: 8px 12px; display: flex; align-items: center; gap: 6px; border-bottom: 1px solid rgba(240,237,232,0.08); }
+    .prev-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .prev-url { font-size: 0.65rem; color: rgba(240,237,232,0.25); margin-left: 4px; }
+    .prev-body { padding: 18px; min-height: 360px; }
+
+    /* ── Bottom action bar ── */
+    .action-bar { display: flex; gap: 12px; flex-wrap: wrap; padding-top: 8px; padding-bottom: 40px; }
+
+    /* ── Toast ── */
+    #toast-box { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+    .toast {
+      display: flex; align-items: center; gap: 8px; padding: 10px 16px;
+      border-radius: 10px; background: #1e1e1e; border: 1px solid rgba(240,237,232,0.15);
+      color: #f0ede8; font-size: 0.82rem; box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      max-width: 300px; animation: slideIn 0.3s ease;
+    }
+    @keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
+    .toast.ok { border-color: rgba(52,211,153,0.4); }
+    .toast.err { border-color: rgba(255,107,107,0.4); }
+
+    /* ── Light mode ── */
+    [data-theme="light"] body { background: #faf9f7; color: #1a1612; }
+    [data-theme="light"] .sidebar { background: #f3f1ed; border-right-color: rgba(26,22,18,0.1); }
+    [data-theme="light"] .sidebar-header { border-bottom-color: rgba(26,22,18,0.1); }
+    [data-theme="light"] .sb-sec { color: rgba(26,22,18,0.3); }
+    [data-theme="light"] .sb-link { color: rgba(26,22,18,0.55); }
+    [data-theme="light"] .sb-link:hover { background: rgba(0,0,0,0.04); color: #1a1612; }
+    [data-theme="light"] .sb-link.active { background: rgba(245,166,35,0.12); }
+    [data-theme="light"] .sb-footer { border-top-color: rgba(26,22,18,0.1); }
+    [data-theme="light"] .user-card { background: rgba(0,0,0,0.04); border-color: rgba(26,22,18,0.1); }
+    [data-theme="light"] .user-nm { color: #1a1612; }
+    [data-theme="light"] .user-em { color: rgba(26,22,18,0.4); }
+    [data-theme="light"] .topbar { background: rgba(250,249,247,0.9); border-bottom-color: rgba(26,22,18,0.1); }
+    [data-theme="light"] .topbar-title { color: #1a1612; }
+    [data-theme="light"] .fsec { background: #fff; border-color: rgba(26,22,18,0.1); }
+    [data-theme="light"] .fsec-head { border-bottom-color: rgba(26,22,18,0.08); }
+    [data-theme="light"] .fsec-title { color: #1a1612; }
+    [data-theme="light"] .fsec-sub { color: rgba(26,22,18,0.4); }
+    [data-theme="light"] .fg label { color: rgba(26,22,18,0.55); }
+    [data-theme="light"] .fg input, [data-theme="light"] .fg textarea {
+      background: rgba(0,0,0,0.04); border-color: rgba(26,22,18,0.15); color: #1a1612;
+    }
+    [data-theme="light"] .fg input:focus, [data-theme="light"] .fg textarea:focus { background: #fff; border-color: #F5A623; }
+    [data-theme="light"] .fg input::placeholder, [data-theme="light"] .fg textarea::placeholder { color: rgba(26,22,18,0.3); }
+    [data-theme="light"] .skills-area { background: rgba(0,0,0,0.04); border-color: rgba(26,22,18,0.15); }
+    [data-theme="light"] .skill-input { color: #1a1612; }
+    [data-theme="light"] .repeat-item { background: #f7f5f2; border-color: rgba(26,22,18,0.12); }
+    [data-theme="light"] .prev-frame { background: #fff; border-color: rgba(26,22,18,0.12); }
+    [data-theme="light"] .prev-chrome { background: #f3f1ed; border-bottom-color: rgba(26,22,18,0.08); }
+    [data-theme="light"] .autosave-ind { color: rgba(26,22,18,0.5); }
+    [data-theme="light"] .btn-outline { border-color: rgba(26,22,18,0.25); color: rgba(26,22,18,0.7); }
+    [data-theme="light"] .icon-btn { background: rgba(0,0,0,0.04); border-color: rgba(26,22,18,0.2); }
+
+    /* ── Responsive ── */
+    @media (max-width: 1100px) { .details-wrap { grid-template-columns: 1fr; } .preview-panel { display: none; } }
+    @media (max-width: 900px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); box-shadow: 0 0 60px rgba(0,0,0,0.8); }
+      .sb-close { display: flex; }
+      .main-area { margin-left: 0; }
+      .ham-btn { display: flex; }
+      .page-body { padding: 20px 16px 48px; }
+      .topbar { padding: 0 16px; }
+    }
+    @media (max-width: 600px) { .form-grid-2 { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+<div class="dash-layout">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="index.html" class="sidebar-logo"><div class="logo-mark">P</div> PortfolioCraft</a>
+      <button class="sb-close" id="sb-close">✕</button>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-sec">Main</div>
+      <a href="dashboard.html" class="sb-link"><span class="ni">◈</span> Dashboard</a>
+      <div class="sb-sec">Build</div>
+      <a href="personal-details.html" class="sb-link active"><span class="ni">👤</span> My Details</a>
+      <a href="templates.html" class="sb-link"><span class="ni">🎨</span> Templates <span class="nb">50</span></a>
+      <div class="sb-sec">Output</div>
+      <a href="portfolio.html" class="sb-link"><span class="ni">🌐</span> My Portfolio</a>
+      <a href="resume.html" class="sb-link"><span class="ni">📄</span> My Resume</a>
+      <div class="sb-sec">Settings</div>
+      <div class="sb-link" id="theme-sb"><span class="ni">🌙</span> Toggle Theme</div>
+      <div class="sb-link" id="signout"><span class="ni">↩</span> Sign Out</div>
+    </nav>
+    <div class="sb-footer">
+      <div class="user-card">
+        <div class="user-av" id="user-av">?</div>
+        <div style="flex:1;min-width:0;"><div class="user-nm" id="user-nm">—</div><div class="user-em" id="user-em">—</div></div>
+      </div>
+    </div>
+  </aside>
+  <div class="sb-overlay" id="sb-overlay"></div>
+
+  <!-- ═══ MAIN ═══ -->
+  <div class="main-area">
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="ham-btn" id="ham">☰</button>
+        <span class="topbar-title">My Details</span>
+      </div>
+      <div class="topbar-right">
+        <div class="autosave-ind"><div class="as-dot saved" id="as-dot"></div><span id="as-txt">All saved</span></div>
+        <button class="icon-btn" id="theme-btn">☀️</button>
+        <button class="btn-amber" onclick="saveAll()">Save All</button>
+        <a href="portfolio.html" class="btn-outline">Preview Portfolio →</a>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <div id="alert-box"></div>
+      <div class="details-wrap">
+
+        <!-- ═══ FORM COLUMN ═══ -->
+        <div id="form-col">
+
+          <!-- Personal Info -->
+          <div class="fsec">
+            <div class="fsec-head">
+              <div class="fsec-icon">👤</div>
+              <div><div class="fsec-title">Personal Information</div><div class="fsec-sub">Your identity, contact, and identity details</div></div>
+            </div>
+            <div class="fsec-body">
+              <div class="form-grid-2">
+                <div class="fg"><label for="f-name">Full Name *</label><input type="text" id="f-name" placeholder="Your full name"></div>
+                <div class="fg"><label for="f-email">Email Address *</label><input type="email" id="f-email" placeholder="you@example.com"></div>
+              </div>
+              <div class="form-grid-2">
+                <div class="fg"><label for="f-phone">Phone Number</label><input type="tel" id="f-phone" placeholder="+91 98765 43210"></div>
+                <div class="fg"><label for="f-title">Portfolio Title</label><input type="text" id="f-title" placeholder="e.g. Full Stack Developer"></div>
+              </div>
+              <div class="form-grid-2">
+                <div class="fg"><label for="f-github">GitHub URL</label><input type="url" id="f-github" placeholder="https://github.com/you"></div>
+                <div class="fg"><label for="f-linkedin">LinkedIn URL</label><input type="url" id="f-linkedin" placeholder="https://linkedin.com/in/you"></div>
+              </div>
+              <div class="fg" style="margin-bottom:0;">
+                <label for="f-about">About Me</label>
+                <textarea id="f-about" rows="4" placeholder="Write a short bio about yourself…"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Skills -->
+          <div class="fsec">
+            <div class="fsec-head">
+              <div class="fsec-icon">⚡</div>
+              <div><div class="fsec-title">Skills</div><div class="fsec-sub">Type a skill and press Enter or comma to add</div></div>
+            </div>
+            <div class="fsec-body">
+              <div class="skills-area" id="skills-area" onclick="document.getElementById('skill-inp').focus()">
+                <input type="text" id="skill-inp" class="skill-input" placeholder="Add a skill… (press Enter)">
+              </div>
+              <p style="font-size:0.72rem;color:rgba(240,237,232,0.3);margin-top:8px;">Suggestions: JavaScript · React · Python · Node.js · CSS · Figma · Git · SQL · Docker</p>
+            </div>
+          </div>
+
+          <!-- Education -->
+          <div class="fsec">
+            <div class="fsec-head">
+              <div class="fsec-icon">🎓</div>
+              <div><div class="fsec-title">Education</div><div class="fsec-sub">Degrees, diplomas, courses</div></div>
+            </div>
+            <div class="fsec-body">
+              <div class="repeat-list" id="edu-list"></div>
+              <button class="add-btn" onclick="addEdu()">+ Add Education</button>
+            </div>
+          </div>
+
+          <!-- Experience -->
+          <div class="fsec">
+            <div class="fsec-head">
+              <div class="fsec-icon">💼</div>
+              <div><div class="fsec-title">Work Experience</div><div class="fsec-sub">Jobs, internships, freelance</div></div>
+            </div>
+            <div class="fsec-body">
+              <div class="repeat-list" id="exp-list"></div>
+              <button class="add-btn" onclick="addExp()">+ Add Experience</button>
+            </div>
+          </div>
+
+          <!-- Projects -->
+          <div class="fsec">
+            <div class="fsec-head">
+              <div class="fsec-icon">🚀</div>
+              <div><div class="fsec-title">Projects</div><div class="fsec-sub">Your best work — personal, open source, client</div></div>
+            </div>
+            <div class="fsec-body">
+              <div class="repeat-list" id="proj-list"></div>
+              <button class="add-btn" onclick="addProj()">+ Add Project</button>
+            </div>
+          </div>
+
+          <!-- Certifications -->
+          <div class="fsec">
+            <div class="fsec-head">
+              <div class="fsec-icon">🏆</div>
+              <div><div class="fsec-title">Certifications</div><div class="fsec-sub">Certificates, awards, achievements</div></div>
+            </div>
+            <div class="fsec-body">
+              <div class="repeat-list" id="cert-list"></div>
+              <button class="add-btn" onclick="addCert()">+ Add Certification</button>
+            </div>
+          </div>
+
+          <!-- Action bar -->
+          <div class="action-bar">
+            <button class="btn-amber" onclick="saveAll()" style="padding:12px 32px;font-size:0.92rem;">Save All Details</button>
+            <a href="portfolio.html" class="btn-outline" style="padding:11px 24px;">View Portfolio →</a>
+            <a href="resume.html" class="btn-outline" style="padding:11px 24px;">Generate Resume</a>
+          </div>
+        </div>
+
+        <!-- ═══ PREVIEW COLUMN ═══ -->
+        <div class="preview-panel">
+          <div class="prev-label">Live Preview</div>
+          <div class="prev-frame">
+            <div class="prev-chrome">
+              <div class="prev-dot" style="background:#ff5f57;"></div>
+              <div class="prev-dot" style="background:#febc2e;"></div>
+              <div class="prev-dot" style="background:#28c840;"></div>
+              <span class="prev-url">portfolio preview</span>
+            </div>
+            <div class="prev-body" id="live-prev">
+              <div style="text-align:center;padding:40px 10px;color:rgba(240,237,232,0.2);">
+                <div style="font-size:2rem;margin-bottom:8px;">✦</div>
+                <p style="font-size:0.72rem;">Start typing to see preview</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /details-wrap -->
+    </div><!-- /page-body -->
+  </div><!-- /main-area -->
+</div><!-- /dash-layout -->
+
+<div id="toast-box"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/script.js"></script>
+<script>
+'use strict';
+let _user = null;
+let _skills = [];
+let _saveTimer = null;
+let _eduN = 0, _expN = 0, _projN = 0, _certN = 0;
+
+/* ── Toast ── */
+function showToast(msg, type='default') {
+  const b = document.getElementById('toast-box');
+  const t = document.createElement('div');
+  t.className = 'toast' + (type==='ok' ? ' ok' : type==='err' ? ' err' : '');
+  t.textContent = msg;
+  b.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+/* ── Theme ── */
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('pc-theme', t);
+  const btn = document.getElementById('theme-btn');
+  if (btn) btn.textContent = t === 'dark' ? '☀️' : '🌙';
+}
+function toggleTheme() {
+  applyTheme((document.documentElement.getAttribute('data-theme')||'dark')==='dark' ? 'light' : 'dark');
+}
+
+/* ── Sidebar ── */
+function initSB() {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sb-overlay');
+  const hm = document.getElementById('ham');
+  const cl = document.getElementById('sb-close');
+  const open = () => { sb.classList.add('open'); ov.classList.add('show'); };
+  const close = () => { sb.classList.remove('open'); ov.classList.remove('show'); };
+  hm?.addEventListener('click', open);
+  cl?.addEventListener('click', close);
+  ov?.addEventListener('click', close);
+  const resize = () => { if(hm) hm.style.display = window.innerWidth<=900 ? 'flex' : 'none'; };
+  window.addEventListener('resize', resize);
+  resize();
+}
+
+/* ── Autosave indicator ── */
+function setAS(state) {
+  const dot = document.getElementById('as-dot');
+  const txt = document.getElementById('as-txt');
+  if (!dot || !txt) return;
+  dot.className = 'as-dot ' + state;
+  txt.textContent = state==='saving' ? 'Saving…' : state==='saved' ? 'All saved' : 'Save failed';
+}
+
+/* ── Safe JSON ── */
+function safeArr(v) { if (Array.isArray(v)) return v; try { return JSON.parse(v)||[]; } catch { return []; } }
+
+/* ── Initials ── */
+function initials(n) { return (n||'?').trim().split(/\s+/).slice(0,2).map(w=>(w[0]||'').toUpperCase()).join('')||'?'; }
+
+/* ── Gather repeatable ── */
+function gatherRepeat(listId, fields) {
+  return Array.from(document.getElementById(listId).querySelectorAll('.repeat-item')).map(el => {
+    const o = {};
+    fields.forEach(f => { const inp = el.querySelector('[data-f="'+f+'"]'); if(inp) o[f] = inp.value.trim(); });
+    return o;
+  });
+}
+
+/* ── Gather all data ── */
+function gatherData() {
+  return {
+    name:            document.getElementById('f-name').value.trim(),
+    email:           document.getElementById('f-email').value.trim(),
+    phone:           document.getElementById('f-phone').value.trim(),
+    portfolio_title: document.getElementById('f-title').value.trim(),
+    github:          document.getElementById('f-github').value.trim(),
+    linkedin:        document.getElementById('f-linkedin').value.trim(),
+    about:           document.getElementById('f-about').value.trim(),
+    skills:          _skills,
+    education:       gatherRepeat('edu-list',  ['degree','institution','year','grade','description']),
+    experience:      gatherRepeat('exp-list',  ['role','company','from','to','description']),
+    projects:        gatherRepeat('proj-list', ['name','tech','url','description']),
+    certifications:  gatherRepeat('cert-list', ['title','issuer','year','url']),
+  };
+}
+
+/* ── Save all ── */
+async function saveAll() {
+  if (!_user) return;
+  setAS('saving');
+  try {
+    const { error } = await DB.upsertDetails(_user.id, gatherData());
+    if (error) { setAS('error'); showToast('Save failed: ' + error.message, 'err'); }
+    else        { setAS('saved'); showToast('Details saved! ✓', 'ok'); }
+  } catch(e) { setAS('error'); showToast('Error: ' + e.message, 'err'); }
+}
+
+/* ── Auto-save ── */
+function triggerAutoSave() {
+  setAS('saving');
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(saveAll, 1400);
+  updatePreview();
+}
+
+/* ── Skills ── */
+function renderSkills() {
+  const area = document.getElementById('skills-area');
+  const inp  = document.getElementById('skill-inp');
+  area.querySelectorAll('.skill-pill').forEach(p => p.remove());
+  _skills.forEach((s, i) => {
+    const pill = document.createElement('div');
+    pill.className = 'skill-pill';
+    pill.innerHTML = `<span>${escHtml(s)}</span><button onclick="removeSkill(${i})" title="Remove">✕</button>`;
+    area.insertBefore(pill, inp);
+  });
+}
+function removeSkill(i) { _skills.splice(i, 1); renderSkills(); triggerAutoSave(); }
+function setupSkillInput() {
+  const inp = document.getElementById('skill-inp');
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      const v = inp.value.replace(',','').trim();
+      if (v && !_skills.includes(v) && _skills.length < 30) {
+        _skills.push(v); inp.value = ''; renderSkills(); triggerAutoSave();
+      }
+    }
+    if (e.key === 'Backspace' && !inp.value && _skills.length) {
+      _skills.pop(); renderSkills();
+    }
+  });
+}
+
+/* ── HTML escape ── */
+function escHtml(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ── Repeatable builders ── */
+function makeItem(id, html) {
+  const div = document.createElement('div');
+  div.className = 'repeat-item';
+  div.id = id;
+  div.innerHTML = `<button class="rr" onclick="removeItem('${id}')">✕</button>${html}`;
+  div.querySelectorAll('input, textarea').forEach(el => el.addEventListener('input', triggerAutoSave));
+  return div;
+}
+function removeItem(id) {
+  const el = document.getElementById(id);
+  if (el) { el.style.opacity='0'; el.style.transform='scale(0.96)'; el.style.transition='0.2s'; setTimeout(()=>{el.remove();saveAll();},200); }
+}
+
+function addEdu(d={}) {
+  const id = 'edu-' + (++_eduN);
+  const html = `
+    <div class="form-grid-2">
+      <div class="fg"><label>Degree / Course *</label><input type="text" data-f="degree" value="${escHtml(d.degree||'')}" placeholder="B.Tech Computer Science"></div>
+      <div class="fg"><label>Institution *</label><input type="text" data-f="institution" value="${escHtml(d.institution||'')}" placeholder="IIT Bombay"></div>
+    </div>
+    <div class="form-grid-2">
+      <div class="fg"><label>Year</label><input type="text" data-f="year" value="${escHtml(d.year||'')}" placeholder="2020 – 2024"></div>
+      <div class="fg"><label>Grade / GPA</label><input type="text" data-f="grade" value="${escHtml(d.grade||'')}" placeholder="8.5 CGPA"></div>
+    </div>
+    <div class="fg" style="margin-bottom:0;"><label>Description</label><textarea data-f="description" rows="2" placeholder="Optional details…">${escHtml(d.description||'')}</textarea></div>`;
+  document.getElementById('edu-list').appendChild(makeItem(id, html));
+}
+
+function addExp(d={}) {
+  const id = 'exp-' + (++_expN);
+  const html = `
+    <div class="form-grid-2">
+      <div class="fg"><label>Job Title *</label><input type="text" data-f="role" value="${escHtml(d.role||'')}" placeholder="Senior Developer"></div>
+      <div class="fg"><label>Company *</label><input type="text" data-f="company" value="${escHtml(d.company||'')}" placeholder="TechCorp India"></div>
+    </div>
+    <div class="form-grid-2">
+      <div class="fg"><label>Start Date</label><input type="text" data-f="from" value="${escHtml(d.from||'')}" placeholder="Jan 2022"></div>
+      <div class="fg"><label>End Date</label><input type="text" data-f="to" value="${escHtml(d.to||'Present')}" placeholder="Present"></div>
+    </div>
+    <div class="fg" style="margin-bottom:0;"><label>Description</label><textarea data-f="description" rows="3" placeholder="Key responsibilities and achievements…">${escHtml(d.description||'')}</textarea></div>`;
+  document.getElementById('exp-list').appendChild(makeItem(id, html));
+}
+
+function addProj(d={}) {
+  const id = 'proj-' + (++_projN);
+  const html = `
+    <div class="form-grid-2">
+      <div class="fg"><label>Project Name *</label><input type="text" data-f="name" value="${escHtml(d.name||'')}" placeholder="My Awesome App"></div>
+      <div class="fg"><label>Tech Stack</label><input type="text" data-f="tech" value="${escHtml(d.tech||'')}" placeholder="React, Node.js, PostgreSQL"></div>
+    </div>
+    <div class="fg"><label>Live URL / GitHub</label><input type="url" data-f="url" value="${escHtml(d.url||'')}" placeholder="https://github.com/you/project"></div>
+    <div class="fg" style="margin-bottom:0;"><label>Description</label><textarea data-f="description" rows="3" placeholder="What does this project do? What problem does it solve?">${escHtml(d.description||'')}</textarea></div>`;
+  document.getElementById('proj-list').appendChild(makeItem(id, html));
+}
+
+function addCert(d={}) {
+  const id = 'cert-' + (++_certN);
+  const html = `
+    <div class="form-grid-2">
+      <div class="fg"><label>Certificate Title *</label><input type="text" data-f="title" value="${escHtml(d.title||'')}" placeholder="AWS Solutions Architect"></div>
+      <div class="fg"><label>Issued By</label><input type="text" data-f="issuer" value="${escHtml(d.issuer||'')}" placeholder="Amazon Web Services"></div>
+    </div>
+    <div class="form-grid-2">
+      <div class="fg"><label>Year</label><input type="text" data-f="year" value="${escHtml(d.year||'')}" placeholder="2023"></div>
+      <div class="fg"><label>Credential URL</label><input type="url" data-f="url" value="${escHtml(d.url||'')}" placeholder="https://credly.com/…"></div>
+    </div>`;
+  document.getElementById('cert-list').appendChild(makeItem(id, html));
+}
+
+/* ── Load form from DB data ── */
+function loadForm(d) {
+  const set = (id, v) => { const el = document.getElementById(id); if(el && v!=null) el.value = v; };
+  set('f-name', d.name); set('f-email', d.email); set('f-phone', d.phone);
+  set('f-title', d.portfolio_title); set('f-github', d.github);
+  set('f-linkedin', d.linkedin); set('f-about', d.about);
+  _skills = safeArr(d.skills);
+  renderSkills();
+  safeArr(d.education).forEach(r => addEdu(r));
+  safeArr(d.experience).forEach(r => addExp(r));
+  safeArr(d.projects).forEach(r => addProj(r));
+  safeArr(d.certifications).forEach(r => addCert(r));
+  // Setup auto-save on all existing inputs
+  document.querySelectorAll('#form-col input, #form-col textarea').forEach(el => {
+    el.addEventListener('input', triggerAutoSave);
+  });
+  updatePreview();
+}
+
+/* ── Live preview ── */
+function updatePreview() {
+  const d = gatherData();
+  const pv = document.getElementById('live-prev');
+  if (!pv) return;
+  if (!d.name && !d.portfolio_title) {
+    pv.innerHTML = '<div style="text-align:center;padding:40px 10px;color:rgba(240,237,232,0.2);"><div style="font-size:2rem;margin-bottom:8px;">✦</div><p style="font-size:0.72rem;">Start typing to see preview</p></div>';
+    return;
+  }
+  const skillsHtml = d.skills.slice(0,6).map(s =>
+    `<span style="padding:3px 9px;border-radius:99px;border:1px solid rgba(245,166,35,0.3);font-size:0.7rem;color:#F5A623;">${escHtml(s)}</span>`
+  ).join('');
+  pv.innerHTML = `
+    <div style="background:#050508;border-radius:8px;padding:16px;">
+      <div style="font-size:0.62rem;letter-spacing:0.18em;text-transform:uppercase;color:#F5A623;margin-bottom:6px;">${escHtml(d.portfolio_title)||'Professional'}</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300;color:#e8e6e0;line-height:1;margin-bottom:10px;">${escHtml(d.name)||'Your Name'}</div>
+      ${d.about ? `<div style="font-size:0.75rem;color:rgba(232,230,224,0.5);line-height:1.6;margin-bottom:12px;">${escHtml(d.about.substring(0,100))}${d.about.length>100?'…':''}</div>` : ''}
+      ${d.skills.length ? `<div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px;">${skillsHtml}</div>` : ''}
+      ${d.experience.length ? `<div style="border-top:1px solid rgba(255,255,255,0.06);padding-top:10px;">
+        ${d.experience.slice(0,1).map(e=>`<div style="font-size:0.78rem;color:#e8e6e0;font-weight:600;">${escHtml(e.role)}</div><div style="font-size:0.7rem;color:#F5A623;">${escHtml(e.company)}</div>`).join('')}
+      </div>` : ''}
+    </div>`;
+}
+
+/* ── Main init ── */
+async function init() {
+  applyTheme(localStorage.getItem('pc-theme') || 'dark');
+  document.getElementById('theme-btn')?.addEventListener('click', toggleTheme);
+  document.getElementById('theme-sb')?.addEventListener('click', toggleTheme);
+  initSB();
+  setupSkillInput();
+
+  // Auto-save on base fields
+  ['f-name','f-email','f-phone','f-title','f-github','f-linkedin','f-about'].forEach(id => {
+    document.getElementById(id)?.addEventListener('input', triggerAutoSave);
+  });
+
+  try { _user = await Auth.requireAuth('login.html'); }
+  catch(e) { window.location.href = 'login.html'; return; }
+  if (!_user) return;
+
+  const meta = _user.user_metadata || {};
+  const name = (meta.full_name || meta.name || '').trim() || _user.email.split('@')[0];
+  document.getElementById('user-nm').textContent = name;
+  document.getElementById('user-em').textContent = _user.email;
+  document.getElementById('user-av').textContent = initials(name);
+
+  document.getElementById('signout')?.addEventListener('click', async () => {
+    try { await Auth.signOut(); } catch { window.location.href = 'index.html'; }
+  });
+
+  // Load DB data
+  try {
+    const { data, error } = await DB.getDetails(_user.id);
+    if (!error && data) loadForm(data);
+    else {
+      // Still set up auto-save on empty form
+      document.querySelectorAll('#form-col input, #form-col textarea').forEach(el => {
+        el.addEventListener('input', triggerAutoSave);
+      });
+    }
+  } catch(e) { console.warn('DB load error:', e); }
+
+  setAS('saved');
+}
+
+init().catch(err => console.error('Init error:', err));
+</script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In — PortfolioCraft</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="auth-layout">
+
+  <div class="auth-visual">
+    <div class="auth-visual-bg"></div>
+    <a href="index.html" class="auth-visual-logo">
+      <div class="nav-logo-mark">P</div>PortfolioCraft
+    </a>
+    <div class="auth-visual-quote">
+      <blockquote>"Your portfolio is the first impression before the interview."</blockquote>
+      <cite>— PORTFOLIOCRAFT TEAM</cite>
+    </div>
+    <div class="auth-visual-features">
+      <div class="auth-feature"><div class="auth-feature-icon">🎨</div>50 premium templates</div>
+      <div class="auth-feature"><div class="auth-feature-icon">⚡</div>Live real-time preview</div>
+      <div class="auth-feature"><div class="auth-feature-icon">📄</div>One-click PDF resume</div>
+      <div class="auth-feature"><div class="auth-feature-icon">🔗</div>Shareable portfolio link</div>
+      <div class="auth-feature"><div class="auth-feature-icon">💾</div>Auto-save everything</div>
+    </div>
+  </div>
+
+  <div class="auth-form-side">
+    <div class="auth-form-wrap">
+      <button class="theme-btn" style="margin-bottom:32px;">☀️</button>
+      <div class="auth-title">Welcome back.</div>
+      <p class="auth-sub">Don't have an account? <a href="signup.html">Create one free →</a></p>
+
+      <div id="alert-box" style="display:none;" class="alert"></div>
+
+      <form id="login-form" novalidate>
+        <div class="form-group">
+          <label class="form-label">Email address</label>
+          <div class="form-input-icon">
+            <span class="icon">✉</span>
+            <input class="form-input" type="email" id="email" placeholder="you@example.com" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <div class="form-input-icon">
+            <span class="icon">🔒</span>
+            <input class="form-input" type="password" id="password" placeholder="Your password" required>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary" id="login-btn"
+          style="width:100%;justify-content:center;margin-top:8px;">
+          Sign In →
+        </button>
+      </form>
+
+      <div class="sep"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <button class="btn btn-dark" onclick="Toast.show('Google OAuth coming soon!','info')" style="justify-content:center;">
+          G &nbsp;Google
+        </button>
+        <button class="btn btn-dark" onclick="Toast.show('GitHub OAuth coming soon!','info')" style="justify-content:center;">
+          ⌥ &nbsp;GitHub
+        </button>
+      </div>
+      <p style="text-align:center;margin-top:24px;font-size:0.825rem;color:var(--text-40);">
+        Don't have an account? <a href="signup.html" style="color:var(--amber);">Sign up free</a>
+      </p>
+    </div>
+  </div>
+</div>
+<div id="toast-container"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/script.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  Theme.init();
+  document.querySelectorAll('.theme-btn').forEach(b => b.addEventListener('click', Theme.toggle));
+  await Auth.redirectIfAuthed('dashboard.html');
+
+  const form     = document.getElementById('login-form');
+  const btn      = document.getElementById('login-btn');
+  const alertBox = document.getElementById('alert-box');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    alertBox.style.display = 'none';
+    const email    = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    if (!email || !password) { showAlert('Please fill in all fields.', 'error'); return; }
+    setLoading(btn, true, 'Signing in…');
+    const { error } = await Auth.signIn(email, password);
+    if (error) { showAlert(error.message, 'error'); setLoading(btn, false, 'Sign In →'); return; }
+    Toast.show('Welcome back! 👋', 'success');
+    setTimeout(() => window.location.href = 'dashboard.html', 600);
+  });
+
+  function showAlert(msg, type) {
+    alertBox.className = `alert alert-${type}`;
+    alertBox.innerHTML = `<span>${type === 'error' ? '✕' : '✓'}</span> ${msg}`;
+    alertBox.style.display = 'flex';
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account — PortfolioCraft</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<div class="auth-layout">
+
+  <div class="auth-visual">
+    <div class="auth-visual-bg"></div>
+
+    <a href="index.html" class="auth-visual-logo">
+      <div class="nav-logo-mark">P</div>PortfolioCraft
+    </a>
+
+    <div class="auth-visual-quote">
+      <blockquote>
+        "The difference between a good candidate and a great one is how they present themselves."
+      </blockquote>
+      <cite>— HIRING MANAGER, FORTUNE 500</cite>
+    </div>
+
+    <div class="auth-visual-features">
+      <div class="auth-feature"><div class="auth-feature-icon">✓</div>Completely free to start</div>
+      <div class="auth-feature"><div class="auth-feature-icon">✓</div>No credit card needed</div>
+      <div class="auth-feature"><div class="auth-feature-icon">✓</div>Live in under 5 minutes</div>
+      <div class="auth-feature"><div class="auth-feature-icon">✓</div>50 beautiful templates</div>
+    </div>
+  </div>
+
+  <div class="auth-form-side">
+    <div class="auth-form-wrap">
+
+      <button class="theme-btn" style="margin-bottom:32px;">☀️</button>
+
+      <div class="auth-title">Create your account.</div>
+      <p class="auth-sub">
+        Already have one? <a href="login.html">Sign in →</a>
+      </p>
+
+      <div id="alert-box" style="display:none;" class="alert"></div>
+
+      <form id="signup-form" novalidate>
+
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <div class="form-input-icon">
+            <span class="icon">👤</span>
+            <input class="form-input" type="text" id="name" placeholder="Your full name" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Email Address</label>
+          <div class="form-input-icon">
+            <span class="icon">✉</span>
+            <input class="form-input" type="email" id="email" placeholder="you@example.com" required>
+          </div>
+        </div>
+
+        <div class="form-row">
+
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Password</label>
+            <input class="form-input" type="password" id="password" placeholder="Min 8 chars" required minlength="8">
+          </div>
+
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Confirm</label>
+            <input class="form-input" type="password" id="confirm" placeholder="Repeat" required>
+          </div>
+
+        </div>
+
+        <div style="margin:20px 0 28px;display:flex;align-items:flex-start;gap:10px;">
+          <input type="checkbox" id="agree" required
+            style="accent-color:var(--amber);width:16px;height:16px;margin-top:2px;flex-shrink:0;">
+
+          <label for="agree"
+            style="font-size:0.825rem;color:var(--text-60);cursor:pointer;line-height:1.5;">
+            I agree to the
+            <a href="#" style="color:var(--amber);">Terms</a>
+            and
+            <a href="#" style="color:var(--amber);">Privacy Policy</a>
+          </label>
+        </div>
+
+        <button type="submit"
+          class="btn btn-primary"
+          id="signup-btn"
+          style="width:100%;justify-content:center;">
+
+          Create Free Account →
+        </button>
+
+      </form>
+
+      <p style="text-align:center;margin-top:24px;font-size:0.825rem;color:var(--text-40);">
+        Already have an account?
+        <a href="login.html" style="color:var(--amber);">Sign in</a>
+      </p>
+
+    </div>
+  </div>
+
+</div>
+
+<div id="toast-container"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/script.js"></script>
+
+<script>
+
+document.addEventListener('DOMContentLoaded', async () => {
+
+  Theme.init();
+  document.querySelectorAll('.theme-btn').forEach(b =>
+    b.addEventListener('click', Theme.toggle)
+  );
+
+  await Auth.redirectIfAuthed('dashboard.html');
+
+  const form = document.getElementById('signup-form');
+  const btn = document.getElementById('signup-btn');
+  const alertBox = document.getElementById('alert-box');
+
+  form.addEventListener('submit', async (e) => {
+
+    e.preventDefault();
+    alertBox.style.display = 'none';
+
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const confirm = document.getElementById('confirm').value;
+    const agree = document.getElementById('agree').checked;
+
+    if (!name) {
+      showAlert('Please enter your name.', 'error');
+      return;
+    }
+
+    if (password.length < 8) {
+      showAlert('Password must be at least 8 characters.', 'error');
+      return;
+    }
+
+    if (password !== confirm) {
+      showAlert('Passwords do not match.', 'error');
+      return;
+    }
+
+    if (!agree) {
+      showAlert('Please agree to the Terms.', 'error');
+      return;
+    }
+
+    setLoading(btn, true, 'Creating account…');
+
+    const { data, error } = await Auth.signUp(email, password, name);
+
+    if (error) {
+      showAlert(error.message, 'error');
+      setLoading(btn, false, 'Create Free Account →');
+      return;
+    }
+
+    if (data.user)
+      await DB.upsertDetails(data.user.id, {
+        name,
+        email,
+        selected_template: 1
+      });
+
+    showAlert(
+      'Account created! Check your email to confirm, then sign in.',
+      'success'
+    );
+
+    setLoading(btn, false, 'Done ✓');
+    btn.disabled = true;
+
+    setTimeout(() => {
+      window.location.href = 'login.html';
+    }, 3000);
+
+  });
+
+  function showAlert(msg, type) {
+
+    alertBox.className = `alert alert-${type}`;
+    alertBox.innerHTML = `<span>${type === 'error' ? '✕' : '✓'}</span> ${msg}`;
+    alertBox.style.display = 'flex';
+
+  }
+
+});
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Templates — FolioAI</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: #080808; color: #f0ede8; }
+    .dash-layout { display: flex; min-height: 100vh; }
+
+    /* Sidebar */
+    .sidebar { width: 260px; flex-shrink: 0; position: fixed; top: 0; left: 0; bottom: 0; background: #0f0f0f; border-right: 1px solid rgba(240,237,232,0.08); display: flex; flex-direction: column; z-index: 500; transition: transform 0.3s ease; }
+    .sidebar-header { padding: 24px 20px 20px; border-bottom: 1px solid rgba(240,237,232,0.08); display: flex; align-items: center; justify-content: space-between; }
+    .sidebar-logo { font-family: 'Cormorant Garamond', serif; font-size: 1.2rem; font-weight: 600; display: flex; align-items: center; gap: 10px; text-decoration: none; color: #f0ede8; }
+    .logo-mark { width: 30px; height: 30px; background: #F5A623; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; color: #080808; flex-shrink: 0; }
+    .sb-close { display: none; width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); align-items: center; justify-content: center; cursor: pointer; font-size: 0.75rem; color: rgba(240,237,232,0.6); }
+    .sb-nav { flex: 1; padding: 16px 10px; overflow-y: auto; }
+    .sb-sec { font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase; color: rgba(240,237,232,0.25); padding: 0 10px; margin: 20px 0 6px; }
+    .sb-sec:first-child { margin-top: 0; }
+    .sb-link { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 6px; font-size: 0.875rem; font-weight: 500; color: rgba(240,237,232,0.55); transition: all 0.15s; cursor: pointer; text-decoration: none; position: relative; border: 1px solid transparent; }
+    .sb-link .ni { width: 18px; text-align: center; font-size: 1rem; flex-shrink: 0; }
+    .sb-link .nb { margin-left: auto; background: #F5A623; color: #080808; font-size: 0.58rem; font-weight: 700; padding: 1px 6px; border-radius: 99px; }
+    .sb-link:hover { background: rgba(255,255,255,0.05); color: #f0ede8; }
+    .sb-link.active { background: rgba(245,166,35,0.1); color: #F5A623; border-color: rgba(245,166,35,0.25); }
+    .sb-link.active::before { content: ''; position: absolute; left: -10px; top: 50%; transform: translateY(-50%); width: 3px; height: 18px; background: #F5A623; border-radius: 0 99px 99px 0; }
+    .sb-footer { padding: 12px 10px; border-top: 1px solid rgba(240,237,232,0.08); }
+    .user-card { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); }
+    .user-av { width: 34px; height: 34px; border-radius: 50%; background: #F5A623; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; font-weight: 700; color: #080808; flex-shrink: 0; }
+    .user-nm { font-size: 0.8rem; font-weight: 600; color: #f0ede8; }
+    .user-em { font-size: 0.67rem; color: rgba(240,237,232,0.35); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 160px; }
+    .sb-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 499; }
+    .sb-overlay.show { display: block; }
+
+    /* Main */
+    .main-area { flex: 1; margin-left: 260px; display: flex; flex-direction: column; min-height: 100vh; }
+    .topbar { position: sticky; top: 0; height: 62px; padding: 0 28px; background: rgba(8,8,8,0.9); backdrop-filter: blur(20px); border-bottom: 1px solid rgba(240,237,232,0.08); display: flex; align-items: center; justify-content: space-between; z-index: 400; }
+    .topbar-title { font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; font-weight: 300; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+    .page-body { padding: 28px; }
+
+    /* Buttons */
+    .btn-amber { background: #F5A623; color: #080808; border: none; padding: 9px 20px; border-radius: 99px; font-size: 0.82rem; font-weight: 600; cursor: pointer; font-family: inherit; transition: box-shadow 0.2s, transform 0.2s; text-decoration: none; display: inline-flex; align-items: center; }
+    .btn-amber:hover { box-shadow: 0 6px 24px rgba(245,166,35,0.35); transform: translateY(-1px); }
+    .icon-btn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 1rem; transition: border-color 0.15s, transform 0.2s; }
+    .icon-btn:hover { border-color: #F5A623; transform: rotate(20deg); }
+    .ham-btn { display: none; width: 36px; height: 36px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05); align-items: center; justify-content: center; cursor: pointer; font-size: 1.1rem; }
+
+    /* Filter pills */
+    .filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px; }
+    .fpill { padding: 7px 18px; border-radius: 99px; border: 1px solid rgba(240,237,232,0.15); background: transparent; color: rgba(240,237,232,0.55); font-size: 0.8rem; font-weight: 500; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+    .fpill:hover { border-color: rgba(245,166,35,0.4); color: rgba(240,237,232,0.9); }
+    .fpill.active { background: #F5A623; border-color: #F5A623; color: #080808; }
+
+    /* Template grid */
+    .tmpl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+    .tmpl-card { border-radius: 12px; overflow: hidden; border: 1px solid rgba(240,237,232,0.1); cursor: pointer; transition: all 0.22s; background: #0f0f0f; position: relative; }
+    .tmpl-card:hover { transform: translateY(-5px); border-color: #F5A623; box-shadow: 0 12px 40px rgba(245,166,35,0.18); }
+    .tmpl-card.selected-tmpl { border-color: #F5A623; box-shadow: 0 0 0 2px #F5A623, 0 12px 40px rgba(245,166,35,0.25); }
+    .sel-badge { position: absolute; top: 8px; right: 8px; background: #F5A623; color: #080808; font-size: 0.65rem; font-weight: 700; padding: 2px 9px; border-radius: 99px; z-index: 5; }
+    .tmpl-preview { height: 160px; position: relative; overflow: hidden; }
+    .tmpl-overlay { position: absolute; inset: 0; background: rgba(8,8,8,0.7); display: flex; align-items: center; justify-content: center; gap: 8px; opacity: 0; transition: opacity 0.2s; backdrop-filter: blur(4px); }
+    .tmpl-card:hover .tmpl-overlay { opacity: 1; }
+    .ov-btn { padding: 7px 16px; border-radius: 99px; font-size: 0.78rem; font-weight: 600; cursor: pointer; border: none; font-family: inherit; }
+    .ov-btn-primary { background: #F5A623; color: #080808; }
+    .ov-btn-ghost { background: rgba(255,255,255,0.15); color: #fff; }
+    .tmpl-info { padding: 12px 14px; background: #0f0f0f; }
+    .tmpl-name { font-size: 0.88rem; font-weight: 600; color: #f0ede8; margin-bottom: 3px; }
+    .tmpl-cat { font-size: 0.68rem; color: #F5A623; letter-spacing: 0.08em; text-transform: uppercase; }
+
+    /* Toast */
+    #toast-box { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+    .toast { display: flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 10px; background: #1e1e1e; border: 1px solid rgba(240,237,232,0.15); color: #f0ede8; font-size: 0.82rem; box-shadow: 0 8px 32px rgba(0,0,0,0.5); max-width: 300px; animation: slideIn 0.3s ease; }
+    @keyframes slideIn { from{transform:translateX(100%);opacity:0} to{transform:translateX(0);opacity:1} }
+    .toast.ok { border-color: rgba(52,211,153,0.4); }
+
+    /* Light mode */
+    [data-theme="light"] body { background: #faf9f7; color: #1a1612; }
+    [data-theme="light"] .sidebar { background: #f3f1ed; border-right-color: rgba(26,22,18,0.1); }
+    [data-theme="light"] .sidebar-header { border-bottom-color: rgba(26,22,18,0.1); }
+    [data-theme="light"] .sb-sec { color: rgba(26,22,18,0.3); }
+    [data-theme="light"] .sb-link { color: rgba(26,22,18,0.55); }
+    [data-theme="light"] .sb-link:hover { background: rgba(0,0,0,0.04); color: #1a1612; }
+    [data-theme="light"] .sb-link.active { background: rgba(245,166,35,0.12); }
+    [data-theme="light"] .sb-footer { border-top-color: rgba(26,22,18,0.1); }
+    [data-theme="light"] .user-card { background: rgba(0,0,0,0.04); border-color: rgba(26,22,18,0.1); }
+    [data-theme="light"] .user-nm { color: #1a1612; }
+    [data-theme="light"] .topbar { background: rgba(250,249,247,0.9); border-bottom-color: rgba(26,22,18,0.1); }
+    [data-theme="light"] .topbar-title { color: #1a1612; }
+    [data-theme="light"] .fpill { border-color: rgba(26,22,18,0.2); color: rgba(26,22,18,0.6); }
+    [data-theme="light"] .tmpl-card { background: #fff; border-color: rgba(26,22,18,0.1); }
+    [data-theme="light"] .tmpl-info { background: #fff; }
+    [data-theme="light"] .tmpl-name { color: #1a1612; }
+    [data-theme="light"] .icon-btn { background: rgba(0,0,0,0.04); border-color: rgba(26,22,18,0.2); }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); box-shadow: 0 0 60px rgba(0,0,0,0.8); }
+      .sb-close { display: flex; }
+      .main-area { margin-left: 0; }
+      .ham-btn { display: flex; }
+      .page-body { padding: 20px 16px; }
+      .topbar { padding: 0 16px; }
+    }
+  </style>
+</head>
+<body>
+<div class="dash-layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="index.html" class="sidebar-logo"><div class="logo-mark">P</div> PortfolioCraft</a>
+      <button class="sb-close" id="sb-close">✕</button>
+    </div>
+    <nav class="sb-nav">
+      <div class="sb-sec">Main</div>
+      <a href="dashboard.html" class="sb-link"><span class="ni">◈</span> Dashboard</a>
+      <div class="sb-sec">Build</div>
+      <a href="personal-details.html" class="sb-link"><span class="ni">👤</span> My Details</a>
+      <a href="templates.html" class="sb-link active"><span class="ni">🎨</span> Templates <span class="nb">50</span></a>
+      <div class="sb-sec">Output</div>
+      <a href="portfolio.html" class="sb-link"><span class="ni">🌐</span> My Portfolio</a>
+      <a href="resume.html" class="sb-link"><span class="ni">📄</span> My Resume</a>
+      <div class="sb-sec">Settings</div>
+      <div class="sb-link" id="theme-sb"><span class="ni">🌙</span> Toggle Theme</div>
+      <div class="sb-link" id="signout"><span class="ni">↩</span> Sign Out</div>
+    </nav>
+    <div class="sb-footer">
+      <div class="user-card">
+        <div class="user-av" id="user-av">?</div>
+        <div style="flex:1;min-width:0;"><div class="user-nm" id="user-nm">—</div><div class="user-em" id="user-em">—</div></div>
+      </div>
+    </div>
+  </aside>
+  <div class="sb-overlay" id="sb-overlay"></div>
+
+  <!-- Main -->
+  <div class="main-area">
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="ham-btn" id="ham">☰</button>
+        <span class="topbar-title">Choose Template</span>
+      </div>
+      <div class="topbar-right">
+        <span id="sel-label" style="font-size:0.78rem;color:#F5A623;font-weight:600;"></span>
+        <button class="icon-btn" id="theme-btn">☀️</button>
+        <a href="portfolio.html" class="btn-amber">View Portfolio →</a>
+      </div>
+    </header>
+
+    <div class="page-body">
+      <div class="filter-row" id="filter-row">
+        <button class="fpill active" data-cat="all">All (50)</button>
+        <button class="fpill" data-cat="developer">Developer</button>
+        <button class="fpill" data-cat="designer">Designer</button>
+        <button class="fpill" data-cat="corporate">Corporate</button>
+        <button class="fpill" data-cat="creative">Creative</button>
+        <button class="fpill" data-cat="minimal">Minimal</button>
+        <button class="fpill" data-cat="academic">Academic</button>
+      </div>
+      <div class="tmpl-grid" id="tmpl-grid"></div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-box"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/script.js"></script>
+<script>
+'use strict';
+let _user = null;
+let _selected = null;
+
+// ── All 50 templates ──
+const ALL_TEMPLATES = [
+  {id:1,  name:'Obsidian Dark',     cat:'developer', bg:'linear-gradient(135deg,#050508,#1a1040)', a:'#F5A623', e:'🌑'},
+  {id:2,  name:'Ivory Editorial',   cat:'minimal',   bg:'linear-gradient(135deg,#faf8f4,#ede9e0)', a:'#c4841b', e:'📜'},
+  {id:3,  name:'Neon Terminal',     cat:'developer', bg:'linear-gradient(135deg,#0a0f0a,#0a1a0a)', a:'#00ff88', e:'🖥️'},
+  {id:4,  name:'Coral Creative',    cat:'creative',  bg:'linear-gradient(135deg,#ff6b6b,#feca57)', a:'#fff',    e:'🎨'},
+  {id:5,  name:'Navy Corporate',    cat:'corporate', bg:'linear-gradient(135deg,#1e293b,#334155)', a:'#38bdf8', e:'🏢'},
+  {id:6,  name:'Violet Glass',      cat:'designer',  bg:'linear-gradient(135deg,#1a0a2e,#2d1b4e)', a:'#a78bfa', e:'💜'},
+  {id:7,  name:'Sage Academic',     cat:'academic',  bg:'linear-gradient(135deg,#f0fdf4,#dcfce7)', a:'#16a34a', e:'🌿'},
+  {id:8,  name:'Midnight Split',    cat:'creative',  bg:'linear-gradient(90deg,#0f0f0f 50%,#F5A623 50%)', a:'#fff', e:'⬛'},
+  {id:9,  name:'Rose Gold',         cat:'designer',  bg:'linear-gradient(135deg,#2d1515,#4a1f1f)', a:'#f4a261', e:'🌹'},
+  {id:10, name:'Arctic White',      cat:'minimal',   bg:'linear-gradient(135deg,#f8fafc,#e2e8f0)', a:'#0284c7', e:'❄️'},
+  {id:11, name:'Midnight Blue',     cat:'developer', bg:'linear-gradient(135deg,#0f172a,#1e3a5f)', a:'#60a5fa', e:'🌊'},
+  {id:12, name:'Carbon Matrix',     cat:'developer', bg:'linear-gradient(135deg,#0a0a0a,#1a1a1a)', a:'#ff3366', e:'⬛'},
+  {id:13, name:'Electric Purple',   cat:'developer', bg:'linear-gradient(135deg,#0f0020,#1a0040)', a:'#bf00ff', e:'⚡'},
+  {id:14, name:'Deep Space',        cat:'developer', bg:'linear-gradient(135deg,#020212,#050530)', a:'#00d4ff', e:'🚀'},
+  {id:15, name:'Hacker Green',      cat:'developer', bg:'linear-gradient(135deg,#000,#001200)',    a:'#39ff14', e:'💻'},
+  {id:16, name:'Rust & Steel',      cat:'developer', bg:'linear-gradient(135deg,#1c0a00,#2d1500)', a:'#f97316', e:'🦀'},
+  {id:17, name:'Slate Ocean',       cat:'developer', bg:'linear-gradient(135deg,#0f1923,#1a2e44)', a:'#22d3ee', e:'🌐'},
+  {id:18, name:'Neon Sunset',       cat:'developer', bg:'linear-gradient(135deg,#1a0520,#2d0a00)', a:'#ff6ec7', e:'🌆'},
+  {id:19, name:'Dark Matter',       cat:'developer', bg:'linear-gradient(135deg,#030305,#0a0a15)', a:'#a855f7', e:'🔭'},
+  {id:20, name:'Terminal Classic',  cat:'developer', bg:'linear-gradient(135deg,#001400,#002800)', a:'#33ff00', e:'⌨️'},
+  {id:21, name:'Rose Gold Luxury',  cat:'designer',  bg:'linear-gradient(135deg,#1a0010,#2d0020)', a:'#f9a8d4', e:'✨'},
+  {id:22, name:'Blush Editorial',   cat:'designer',  bg:'linear-gradient(135deg,#2a0a1a,#1a0a15)', a:'#fb7185', e:'🌸'},
+  {id:23, name:'Golden Hour',       cat:'designer',  bg:'linear-gradient(135deg,#1a1000,#2d1a00)', a:'#fbbf24', e:'🌟'},
+  {id:24, name:'Aqua Prism',        cat:'designer',  bg:'linear-gradient(135deg,#001a2a,#002240)', a:'#06b6d4', e:'💎'},
+  {id:25, name:'Vanta Black',       cat:'designer',  bg:'linear-gradient(135deg,#000,#0a0a0a)',    a:'#ff3366', e:'◼'},
+  {id:26, name:'Infrared',          cat:'designer',  bg:'linear-gradient(135deg,#1a0000,#300000)', a:'#ff4444', e:'🔴'},
+  {id:27, name:'Ultraviolet',       cat:'designer',  bg:'linear-gradient(135deg,#040010,#0a0020)', a:'#8b5cf6', e:'🔮'},
+  {id:28, name:'Chrome Future',     cat:'designer',  bg:'linear-gradient(135deg,#101014,#1a1a24)', a:'#e2e8f0', e:'🪞'},
+  {id:29, name:'Executive Gray',    cat:'corporate', bg:'linear-gradient(135deg,#1a1a1a,#2d2d2d)', a:'#9ca3af', e:'🎩'},
+  {id:30, name:'Oxford Blue',       cat:'corporate', bg:'linear-gradient(135deg,#0a1628,#162240)', a:'#fbbf24', e:'📘'},
+  {id:31, name:'Charcoal Premium',  cat:'corporate', bg:'linear-gradient(135deg,#1c1c1c,#2a2a2a)', a:'#d97706', e:'⚫'},
+  {id:32, name:'Bordeaux',          cat:'corporate', bg:'linear-gradient(135deg,#2d0a0a,#420f0f)', a:'#fca5a5', e:'🍷'},
+  {id:33, name:'Forest Executive',  cat:'corporate', bg:'linear-gradient(135deg,#0a1a0a,#142814)', a:'#86efac', e:'🌲'},
+  {id:34, name:'Steel Blue',        cat:'corporate', bg:'linear-gradient(135deg,#0a1520,#142030)', a:'#93c5fd', e:'🔷'},
+  {id:35, name:'Swiss Precision',   cat:'corporate', bg:'linear-gradient(135deg,#f5f5f5,#e8e8e8)', a:'#dc2626', e:'🇨🇭'},
+  {id:36, name:'Midnight Pro',      cat:'corporate', bg:'linear-gradient(135deg,#0a0a14,#14142a)', a:'#818cf8', e:'🌃'},
+  {id:37, name:'Tropical Vibes',    cat:'creative',  bg:'linear-gradient(135deg,#0a4a2a,#1a8a4a)', a:'#4ade80', e:'🌴'},
+  {id:38, name:'Lava Lamp',         cat:'creative',  bg:'linear-gradient(135deg,#ff4500,#ff8c00)', a:'#fff',    e:'🌋'},
+  {id:39, name:'Cosmic Dream',      cat:'creative',  bg:'linear-gradient(135deg,#0a0020,#200050)', a:'#f0abfc', e:'🌌'},
+  {id:40, name:'Candy Pop',         cat:'creative',  bg:'linear-gradient(135deg,#ff69b4,#ff1493)', a:'#fff',    e:'🍭'},
+  {id:41, name:'Ocean Dusk',        cat:'creative',  bg:'linear-gradient(135deg,#1a1a5e,#3a1a5e)', a:'#c084fc', e:'🌅'},
+  {id:42, name:'Sunset Mesa',       cat:'creative',  bg:'linear-gradient(135deg,#7b2d00,#c4440a)', a:'#fed7aa', e:'🏜️'},
+  {id:43, name:'Bone Minimal',      cat:'minimal',   bg:'linear-gradient(135deg,#faf9f7,#f3f1eb)', a:'#6b5e46', e:'🦴'},
+  {id:44, name:'Ash Gray',          cat:'minimal',   bg:'linear-gradient(135deg,#1a1a1a,#222)',    a:'#e5e7eb', e:'🪨'},
+  {id:45, name:'Clean Noir',        cat:'minimal',   bg:'linear-gradient(135deg,#050505,#0f0f0f)', a:'#f5f5f5', e:'⬜'},
+  {id:46, name:'Linen Soft',        cat:'minimal',   bg:'linear-gradient(135deg,#faf0e6,#f0e8d6)', a:'#92400e', e:'🪡'},
+  {id:47, name:'Paper White',       cat:'minimal',   bg:'linear-gradient(135deg,#ffffff,#f7f7f7)', a:'#333',    e:'📄'},
+  {id:48, name:'Library Dark',      cat:'academic',  bg:'linear-gradient(135deg,#1a1206,#2d1e08)', a:'#d97706', e:'📚'},
+  {id:49, name:'Research Blue',     cat:'academic',  bg:'linear-gradient(135deg,#eff6ff,#dbeafe)', a:'#1d4ed8', e:'🔬'},
+  {id:50, name:'Scholar Noir',      cat:'academic',  bg:'linear-gradient(135deg,#0c0c14,#14142a)', a:'#818cf8', e:'📖'},
+];
+
+// ── Toast ──
+function showToast(msg, type='') {
+  const b = document.getElementById('toast-box');
+  const t = document.createElement('div');
+  t.className = 'toast' + (type ? ' '+type : '');
+  t.textContent = msg;
+  b.appendChild(t);
+  setTimeout(()=>t.remove(), 3500);
+}
+
+// ── Theme ──
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('pc-theme', t);
+  const btn = document.getElementById('theme-btn');
+  if (btn) btn.textContent = t==='dark' ? '☀️' : '🌙';
+}
+function toggleTheme() { applyTheme((document.documentElement.getAttribute('data-theme')||'dark')==='dark' ? 'light' : 'dark'); }
+
+// ── Sidebar ──
+function initSB() {
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sb-overlay');
+  const hm = document.getElementById('ham');
+  const cl = document.getElementById('sb-close');
+  const open = () => { sb.classList.add('open'); ov.classList.add('show'); };
+  const close = () => { sb.classList.remove('open'); ov.classList.remove('show'); };
+  hm?.addEventListener('click', open); cl?.addEventListener('click', close); ov?.addEventListener('click', close);
+  const resize = () => { if(hm) hm.style.display = window.innerWidth<=900 ? 'flex' : 'none'; };
+  window.addEventListener('resize', resize); resize();
+}
+
+// ── Initials ──
+function initials(n) { return (n||'?').trim().split(/\s+/).slice(0,2).map(w=>(w[0]||'').toUpperCase()).join('')||'?'; }
+
+// ── Render grid ──
+function renderGrid(cat) {
+  const list = cat==='all' ? ALL_TEMPLATES : ALL_TEMPLATES.filter(t=>t.cat===cat);
+  document.getElementById('tmpl-grid').innerHTML = list.map((t,i) => `
+    <div class="tmpl-card ${_selected===t.id?'selected-tmpl':''}" id="tc-${t.id}" onclick="selectTemplate(${t.id})" style="animation:fadeIn 0.4s ${i*30}ms both;">
+      ${_selected===t.id ? '<div class="sel-badge">✓ Selected</div>' : ''}
+      <div class="tmpl-preview" style="background:${t.bg};position:relative;">
+        <div style="position:absolute;inset:0;padding:14px;display:flex;flex-direction:column;justify-content:flex-end;">
+          <div style="font-size:1.8rem;margin-bottom:7px;">${t.e}</div>
+          <div style="height:2.5px;width:42%;background:${t.a};border-radius:99px;margin-bottom:5px;opacity:0.9;"></div>
+          <div style="height:2px;width:65%;background:${t.a};border-radius:99px;opacity:0.4;"></div>
+          <div style="height:2px;width:50%;background:${t.a};border-radius:99px;opacity:0.2;margin-top:4px;"></div>
+        </div>
+        <div class="tmpl-overlay">
+          <button class="ov-btn ov-btn-primary" onclick="event.stopPropagation();selectTemplate(${t.id})">${_selected===t.id?'✓ Selected':'Select'}</button>
+          <button class="ov-btn ov-btn-ghost" onclick="event.stopPropagation();window.location.href='portfolio.html'">Preview</button>
+        </div>
+      </div>
+      <div class="tmpl-info">
+        <div class="tmpl-name">${t.name}</div>
+        <div class="tmpl-cat">${t.cat} · #${t.id}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── Select template ──
+async function selectTemplate(id) {
+  if (!_user) return;
+  _selected = id;
+  const t = ALL_TEMPLATES.find(x=>x.id===id);
+  document.getElementById('sel-label').textContent = t ? '✓ ' + t.name : '';
+  renderGrid(document.querySelector('.fpill.active')?.dataset.cat || 'all');
+  try {
+    const { error } = await DB.patchDetails(_user.id, { selected_template: id });
+    if (!error) showToast(`"${t?.name}" selected! ✓`, 'ok');
+    else showToast('Failed to save: ' + error.message);
+  } catch(e) { showToast('Error: ' + e.message); }
+}
+
+// ── Filter ──
+function initFilters() {
+  document.getElementById('filter-row').addEventListener('click', e => {
+    const pill = e.target.closest('.fpill');
+    if (!pill) return;
+    document.querySelectorAll('.fpill').forEach(p => p.classList.remove('active'));
+    pill.classList.add('active');
+    renderGrid(pill.dataset.cat);
+  });
+}
+
+// ── Main ──
+async function init() {
+  applyTheme(localStorage.getItem('pc-theme') || 'dark');
+  document.getElementById('theme-btn')?.addEventListener('click', toggleTheme);
+  document.getElementById('theme-sb')?.addEventListener('click', toggleTheme);
+  initSB(); initFilters();
+
+  try { _user = await Auth.requireAuth('login.html'); } catch { window.location.href='login.html'; return; }
+  if (!_user) return;
+
+  const meta = _user.user_metadata || {};
+  const name = (meta.full_name || meta.name || '').trim() || _user.email.split('@')[0];
+  document.getElementById('user-nm').textContent = name;
+  document.getElementById('user-em').textContent = _user.email;
+  document.getElementById('user-av').textContent = initials(name);
+  document.getElementById('signout')?.addEventListener('click', async()=>{ try{await Auth.signOut();}catch{window.location.href='index.html';} });
+
+  // Load current selection
+  try {
+    const { data } = await DB.getDetails(_user.id);
+    if (data?.selected_template) {
+      _selected = data.selected_template;
+      const t = ALL_TEMPLATES.find(x=>x.id===_selected);
+      document.getElementById('sel-label').textContent = t ? '✓ ' + t.name : '';
+    }
+  } catch(e) { console.warn(e); }
+
+  renderGrid('all');
+}
+
+// Inject fadeIn keyframes
+const style = document.createElement('style');
+style.textContent = '@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }';
+document.head.appendChild(style);
+
+init().catch(err => console.error(err));
+</script>
+</body>
+</html>

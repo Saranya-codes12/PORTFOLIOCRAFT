@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — PortfolioCraft</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    body { margin: 0; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; background: #080808; color: #f0ede8; }
+    .dash-layout { display: flex; min-height: 100vh; }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: 260px; flex-shrink: 0;
+      position: fixed; top: 0; left: 0; bottom: 0;
+      background: #0f0f0f; border-right: 1px solid rgba(240,237,232,0.08);
+      display: flex; flex-direction: column; z-index: 500;
+      transition: transform 0.3s cubic-bezier(0.23,1,0.32,1);
+    }
+    .sidebar-header {
+      padding: 24px 20px 20px; border-bottom: 1px solid rgba(240,237,232,0.08);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .sidebar-logo {
+      font-family: 'Cormorant Garamond', Georgia, serif;
+      font-size: 1.2rem; font-weight: 600;
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; color: #f0ede8;
+    }
+    .logo-mark {
+      width: 30px; height: 30px; background: #F5A623; border-radius: 7px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; font-weight: 700; color: #080808;
+      font-family: 'Plus Jakarta Sans', sans-serif; flex-shrink: 0;
+    }
+    .sidebar-close {
+      display: none; width: 28px; height: 28px; border-radius: 50%;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      align-items: center; justify-content: center; cursor: pointer;
+      font-size: 0.75rem; color: rgba(240,237,232,0.6);
+    }
+    .sidebar-nav { flex: 1; padding: 16px 10px; overflow-y: auto; }
+    .nav-sec {
+      font-size: 0.6rem; letter-spacing: 0.18em; text-transform: uppercase;
+      color: rgba(240,237,232,0.25); padding: 0 10px; margin: 20px 0 6px;
+      font-family: 'DM Mono', monospace;
+    }
+    .nav-sec:first-child { margin-top: 0; }
+    .nav-link {
+      display: flex; align-items: center; gap: 10px; padding: 10px 10px;
+      border-radius: 6px; font-size: 0.875rem; font-weight: 500;
+      color: rgba(240,237,232,0.55); transition: all 0.15s; cursor: pointer;
+      text-decoration: none; position: relative; border: 1px solid transparent;
+    }
+    .nav-link .ni { width: 18px; text-align: center; font-size: 1rem; flex-shrink: 0; }
+    .nav-link .nb {
+      margin-left: auto; background: #F5A623; color: #080808;
+      font-size: 0.58rem; font-weight: 700; padding: 1px 6px; border-radius: 99px;
+    }
+    .nav-link:hover { background: rgba(255,255,255,0.05); color: #f0ede8; }
+    .nav-link.active {
+      background: rgba(245,166,35,0.1); color: #F5A623; border-color: rgba(245,166,35,0.25);
+    }
+    .nav-link.active::before {
+      content: ''; position: absolute; left: -10px; top: 50%;
+      transform: translateY(-50%); width: 3px; height: 18px;
+      background: #F5A623; border-radius: 0 99px 99px 0;
+    }
+    .sidebar-footer { padding: 12px 10px; border-top: 1px solid rgba(240,237,232,0.08); }
+    .user-card {
+      display: flex; align-items: center; gap: 10px; padding: 10px;
+      border-radius: 10px; background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+    .user-av {
+      width: 34px; height: 34px; border-radius: 50%; background: #F5A623;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; font-weight: 700; color: #080808; flex-shrink: 0;
+    }
+    .user-nm { font-size: 0.8rem; font-weight: 600; color: #f0ede8; line-height: 1.2; }
+    .user-em {
+      font-size: 0.67rem; color: rgba(240,237,232,0.35);
+      font-family: 'DM Mono', monospace;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 160px;
+    }
+    .sidebar-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6); z-index: 499;
+    }
+    .sidebar-overlay.show { display: block; }
+
+    /* ── MAIN AREA ── */
+    .main-area { flex: 1; margin-left: 260px; display: flex; flex-direction: column; min-height: 100vh; }
+
+    /* ── TOPBAR ── */
+    .topbar {
+      position: sticky; top: 0; height: 62px; padding: 0 28px;
+      background: rgba(8,8,8,0.88); backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(240,237,232,0.08);
+      display: flex; align-items: center; justify-content: space-between;
+      z-index: 400; flex-shrink: 0;
+    }
+    .topbar-title { font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; font-weight: 300; }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+    /* ── PAGE BODY ── */
+    .page-body { padding: 28px 28px 60px; flex: 1; }
+
+    /* ── GREETING ── */
+    .greeting { margin-bottom: 28px; }
+    .greeting h2 {
+      font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 300; margin-bottom: 4px;
+    }
+    .greeting h2 span { color: #F5A623; font-style: italic; }
+    .greeting p { font-size: 0.75rem; color: rgba(240,237,232,0.35); font-family: 'DM Mono', monospace; }
+
+    /* ── STATS GRID ── */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
+    .sc {
+      background: rgba(255,255,255,0.035); border: 1px solid rgba(240,237,232,0.08);
+      border-radius: 14px; padding: 20px; position: relative; overflow: hidden;
+      cursor: pointer; transition: border-color 0.2s, transform 0.2s;
+    }
+    .sc:hover { border-color: rgba(245,166,35,0.3); transform: translateY(-2px); }
+    .sc-lbl {
+      font-family: 'DM Mono', monospace; font-size: 0.61rem;
+      letter-spacing: 0.14em; text-transform: uppercase;
+      color: rgba(240,237,232,0.35); margin-bottom: 10px;
+    }
+    .sc-val { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 300; color: #f0ede8; line-height: 1; }
+    .sc-sub { font-size: 0.73rem; color: rgba(240,237,232,0.35); margin-top: 6px; }
+
+    /* ── PROGRESS BAR ── */
+    .prog-wrap {
+      background: rgba(255,255,255,0.035); border: 1px solid rgba(240,237,232,0.08);
+      border-radius: 12px; padding: 16px 20px; margin-bottom: 22px;
+    }
+    .prog-head { display: flex; justify-content: space-between; margin-bottom: 8px; }
+    .prog-lbl { font-size: 0.82rem; color: rgba(240,237,232,0.55); }
+    .prog-val { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: #F5A623; }
+    .prog-track { height: 4px; background: rgba(255,255,255,0.1); border-radius: 99px; overflow: hidden; }
+    .prog-fill {
+      height: 100%; border-radius: 99px;
+      background: linear-gradient(90deg, #c4841b, #F5A623);
+      transition: width 1.2s cubic-bezier(0.23,1,0.32,1);
+    }
+    .prog-hint { font-size: 0.72rem; color: rgba(240,237,232,0.3); margin-top: 8px; }
+
+    /* ── DASH GRID ── */
+    .dash-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 18px; }
+    .d-card {
+      background: rgba(255,255,255,0.035); border: 1px solid rgba(240,237,232,0.08);
+      border-radius: 14px; overflow: hidden;
+    }
+    .d-card-head {
+      padding: 16px 20px; border-bottom: 1px solid rgba(240,237,232,0.08);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .d-card-title { font-family: 'Cormorant Garamond', serif; font-size: 1rem; font-weight: 400; }
+    .d-badge {
+      font-family: 'DM Mono', monospace; font-size: 0.6rem; padding: 2px 8px; border-radius: 99px;
+      background: rgba(245,166,35,0.12); border: 1px solid rgba(245,166,35,0.3); color: #F5A623;
+    }
+    .d-card-body { padding: 18px; }
+
+    /* ── QUICK ACTIONS ── */
+    .qa-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .qa {
+      display: flex; align-items: center; gap: 10px; padding: 12px;
+      border-radius: 10px; background: #161616; border: 1px solid rgba(240,237,232,0.08);
+      cursor: pointer; text-decoration: none; color: #f0ede8;
+      transition: border-color 0.15s, transform 0.15s, background 0.15s;
+    }
+    .qa:hover { border-color: #F5A623; background: rgba(245,166,35,0.06); transform: translateY(-1px); }
+    .qa-ic {
+      width: 36px; height: 36px; border-radius: 8px; flex-shrink: 0;
+      background: rgba(245,166,35,0.1); border: 1px solid rgba(245,166,35,0.25);
+      display: flex; align-items: center; justify-content: center; font-size: 1rem;
+    }
+    .qa-lbl { font-size: 0.8rem; font-weight: 600; color: #f0ede8; }
+    .qa-sub { font-size: 0.68rem; color: rgba(240,237,232,0.35); margin-top: 1px; }
+
+    /* ── SIDE CARDS ── */
+    .side-col { display: flex; flex-direction: column; gap: 16px; }
+
+    /* ── CHECKLIST ── */
+    .cl-item {
+      display: flex; align-items: center; gap: 10px; padding: 9px 0;
+      border-bottom: 1px solid rgba(240,237,232,0.07); font-size: 0.82rem;
+    }
+    .cl-item:last-child { border-bottom: none; }
+    .cl-dot {
+      width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700;
+    }
+    .done { background: rgba(52,211,153,0.15); border: 1px solid rgba(52,211,153,0.4); color: #6ee7b7; }
+    .todo { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14); color: rgba(240,237,232,0.3); }
+
+    /* ── ACTIVITY ── */
+    .act {
+      display: flex; align-items: flex-start; gap: 10px; padding: 12px 0;
+      border-bottom: 1px solid rgba(240,237,232,0.07);
+    }
+    .act:last-child { border-bottom: none; }
+    .act-dot { width: 7px; height: 7px; border-radius: 50%; background: #F5A623; margin-top: 5px; flex-shrink: 0; }
+    .act-dot.dim { background: rgba(240,237,232,0.2); }
+    .act-txt { font-size: 0.82rem; color: rgba(240,237,232,0.55); line-height: 1.5; }
+    .act-txt strong { color: #f0ede8; font-weight: 600; }
+    .act-time { font-family: 'DM Mono', monospace; font-size: 0.62rem; color: rgba(240,237,232,0.3); margin-top: 3px; }
+
+    /* ── BUTTONS ── */
+    .btn-amber {
+      background: #F5A623; color: #080808; border: none; padding: 9px 20px; border-radius: 99px;
+      font-size: 0.8rem; font-weight: 600; cursor: pointer; font-family: 'Plus Jakarta Sans', sans-serif;
+      transition: box-shadow 0.2s, transform 0.2s; text-decoration: none; display: inline-flex; align-items: center;
+    }
+    .btn-amber:hover { box-shadow: 0 6px 24px rgba(245,166,35,0.35); transform: translateY(-1px); }
+    .icon-btn {
+      width: 36px; height: 36px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center;
+      cursor: pointer; font-size: 1rem; transition: border-color 0.15s, transform 0.2s;
+    }
+    .icon-btn:hover { border-color: #F5A623; transform: rotate(20deg); }
+    .ham-btn {
+      display: none; width: 36px; height: 36px; border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.15); background: rgba(255,255,255,0.05);
+      align-items: center; justify-content: center; cursor: pointer; font-size: 1.1rem;
+    }
+
+    /* ── LIGHT MODE ── */
+    [data-theme="light"] body { background: #faf9f7; color: #1a1612; }
+    [data-theme="light"] .sidebar { background: #f3f1ed; border-right-color: rgba(26,22,18,0.1); }
+    [data-theme="light"] .sidebar-header { border-bottom-color: rgba(26,22,18,0.1); }
+    [data-theme="light"] .nav-sec { color: rgba(26,22,18,0.3); }
+    [data-theme="light"] .nav-link { color: rgba(26,22,18,0.55); }
+    [data-theme="light"] .nav-link:hover { background: rgba(0,0,0,0.04); color: #1a1612; }
+    [data-theme="light"] .nav-link.active { background: rgba(245,166,35,0.12); }
+    [data-theme="light"] .sidebar-footer { border-top-color: rgba(26,22,18,0.1); }
+    [data-theme="light"] .user-card { background: rgba(0,0,0,0.04); border-color: rgba(26,22,18,0.1); }
+    [data-theme="light"] .user-nm { color: #1a1612; }
+    [data-theme="light"] .user-em { color: rgba(26,22,18,0.4); }
+    [data-theme="light"] .topbar { background: rgba(250,249,247,0.9); border-bottom-color: rgba(26,22,18,0.1); }
+    [data-theme="light"] .topbar-title { color: #1a1612; }
+    [data-theme="light"] .greeting h2 { color: #1a1612; }
+    [data-theme="light"] .greeting p { color: rgba(26,22,18,0.4); }
+    [data-theme="light"] .sc { background: #fff; border-color: rgba(26,22,18,0.1); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+    [data-theme="light"] .sc-lbl { color: rgba(26,22,18,0.4); }
+    [data-theme="light"] .sc-val { color: #1a1612; }
+    [data-theme="light"] .sc-sub { color: rgba(26,22,18,0.4); }
+    [data-theme="light"] .prog-wrap { background: #fff; border-color: rgba(26,22,18,0.1); }
+    [data-theme="light"] .prog-lbl { color: rgba(26,22,18,0.6); }
+    [data-theme="light"] .prog-track { background: rgba(0,0,0,0.08); }
+    [data-theme="light"] .prog-hint { color: rgba(26,22,18,0.35); }
+    [data-theme="light"] .d-card { background: #fff; border-color: rgba(26,22,18,0.1); }
+    [data-theme="light"] .d-card-head { border-bottom-color: rgba(26,22,18,0.08); }
+    [data-theme="light"] .d-card-title { color: #1a1612; }
+    [data-theme="light"] .qa { background: #f3f1ed; border-color: rgba(26,22,18,0.1); color: #1a1612; }
+    [data-theme="light"] .qa-lbl { color: #1a1612; }
+    [data-theme="light"] .qa-sub { color: rgba(26,22,18,0.4); }
+    [data-theme="light"] .cl-item { border-bottom-color: rgba(26,22,18,0.08); }
+    [data-theme="light"] .todo { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.15); color: rgba(26,22,18,0.35); }
+    [data-theme="light"] .cl-item span { color: rgba(26,22,18,0.9); }
+    [data-theme="light"] .act { border-bottom-color: rgba(26,22,18,0.08); }
+    [data-theme="light"] .act-txt { color: rgba(26,22,18,0.6); }
+    [data-theme="light"] .act-txt strong { color: #1a1612; }
+    [data-theme="light"] .act-time { color: rgba(26,22,18,0.35); }
+    [data-theme="light"] .act-dot.dim { background: rgba(26,22,18,0.2); }
+    [data-theme="light"] .icon-btn { background: rgba(0,0,0,0.04); border-color: rgba(26,22,18,0.2); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .sidebar { transform: translateX(-100%); }
+      .sidebar.open { transform: translateX(0); box-shadow: 0 20px 64px rgba(0,0,0,0.7); }
+      .sidebar-close { display: flex; }
+      .main-area { margin-left: 0; }
+      .ham-btn { display: flex; }
+      .dash-grid { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
+      .page-body { padding: 20px 16px 48px; }
+      .topbar { padding: 0 16px; }
+    }
+    @media (max-width: 540px) {
+      .stats-grid { grid-template-columns: 1fr; }
+      .qa-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+<div class="dash-layout">
+
+  <!-- ═══════ SIDEBAR ═══════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <a href="index.html" class="sidebar-logo">
+        <div class="logo-mark">P</div>
+        PortfolioCraft
+      </a>
+      <button class="sidebar-close" id="sidebar-close">✕</button>
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="nav-sec">Main</div>
+      <a href="dashboard.html" class="nav-link active"><span class="ni">◈</span> Dashboard</a>
+
+      <div class="nav-sec">Build</div>
+      <a href="personal-details.html" class="nav-link"><span class="ni">👤</span> My Details</a>
+      <a href="templates.html" class="nav-link"><span class="ni">🎨</span> Templates <span class="nb">50</span></a>
+
+      <div class="nav-sec">Output</div>
+      <a href="portfolio.html" class="nav-link"><span class="ni">🌐</span> My Portfolio</a>
+      <a href="resume.html" class="nav-link"><span class="ni">📄</span> My Resume</a>
+
+      <div class="nav-sec">Settings</div>
+      <div class="nav-link" id="theme-link"><span class="ni">🌙</span> Toggle Theme</div>
+      <div class="nav-link" id="sign-out-btn"><span class="ni">↩</span> Sign Out</div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-av" id="user-avatar">?</div>
+        <div style="flex:1;min-width:0;">
+          <div class="user-nm" id="user-name">Loading…</div>
+          <div class="user-em" id="user-email">—</div>
+        </div>
+        <span style="color:rgba(240,237,232,0.3);font-size:0.8rem;">⋯</span>
+      </div>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+  <!-- ═══════ MAIN ═══════ -->
+  <div class="main-area">
+
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="ham-btn" id="ham-btn">☰</button>
+        <span class="topbar-title">Dashboard</span>
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn" id="theme-btn" title="Toggle theme">☀️</button>
+        <a href="personal-details.html" class="btn-amber">+ Edit Profile</a>
+      </div>
+    </header>
+
+    <div class="page-body">
+
+      <!-- Greeting -->
+      <div class="greeting">
+        <h2>Good to see you, <span id="greeting-name">there</span> 👋</h2>
+        <p id="greeting-date">—</p>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="sc" onclick="location.href='personal-details.html'">
+          <div class="sc-lbl">Profile Complete</div>
+          <div class="sc-val" id="stat-pct">0%</div>
+          <div class="sc-sub" id="stat-pct-sub">Start adding details</div>
+        </div>
+        <div class="sc" onclick="location.href='templates.html'">
+          <div class="sc-lbl">Template</div>
+          <div class="sc-val" id="stat-tmpl" style="font-size:1.1rem;margin-top:6px;">None</div>
+          <div class="sc-sub">Choose from 50 designs</div>
+        </div>
+        <div class="sc">
+          <div class="sc-lbl">Portfolio Status</div>
+          <div class="sc-val" id="stat-status" style="font-size:1.3rem;margin-top:4px;">Draft</div>
+          <div class="sc-sub" id="stat-status-sub">Complete profile to go live</div>
+        </div>
+        <div class="sc" onclick="copyLink()">
+          <div class="sc-lbl">Share Portfolio</div>
+          <div class="sc-val" style="font-size:1rem;color:#F5A623;margin-top:6px;">🔗 Copy Link</div>
+          <div class="sc-sub">Click to copy your URL</div>
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div class="prog-wrap">
+        <div class="prog-head">
+          <span class="prog-lbl">Profile Strength</span>
+          <span class="prog-val" id="prog-val">0%</span>
+        </div>
+        <div class="prog-track">
+          <div class="prog-fill" id="prog-fill" style="width:0%;"></div>
+        </div>
+        <p class="prog-hint" id="prog-hint">Fill in your details to strengthen your profile</p>
+      </div>
+
+      <!-- Main grid -->
+      <div class="dash-grid">
+
+        <!-- Quick actions -->
+        <div class="d-card">
+          <div class="d-card-head">
+            <span class="d-card-title">Quick Actions</span>
+            <span class="d-badge">6 actions</span>
+          </div>
+          <div class="d-card-body">
+            <div class="qa-grid">
+              <a href="personal-details.html" class="qa">
+                <div class="qa-ic">✏️</div>
+                <div><div class="qa-lbl">Edit Details</div><div class="qa-sub">Update your info</div></div>
+              </a>
+              <a href="templates.html" class="qa">
+                <div class="qa-ic">🎨</div>
+                <div><div class="qa-lbl">Browse Templates</div><div class="qa-sub">50 designs</div></div>
+              </a>
+              <a href="portfolio.html" class="qa">
+                <div class="qa-ic">🌐</div>
+                <div><div class="qa-lbl">View Portfolio</div><div class="qa-sub">See live page</div></div>
+              </a>
+              <a href="resume.html" class="qa">
+                <div class="qa-ic">📄</div>
+                <div><div class="qa-lbl">Generate Resume</div><div class="qa-sub">Download PDF</div></div>
+              </a>
+              <div class="qa" onclick="copyLink()">
+                <div class="qa-ic">🔗</div>
+                <div><div class="qa-lbl">Share Portfolio</div><div class="qa-sub">Copy public link</div></div>
+              </div>
+              <a href="personal-details.html" class="qa">
+                <div class="qa-ic">⚡</div>
+                <div><div class="qa-lbl">Add Projects</div><div class="qa-sub">Showcase work</div></div>
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right column -->
+        <div class="side-col">
+
+          <!-- Checklist -->
+          <div class="d-card">
+            <div class="d-card-head">
+              <span class="d-card-title">Getting Started</span>
+              <span class="d-badge" id="cl-prog">0 / 5</span>
+            </div>
+            <div class="d-card-body" style="padding:12px 18px;">
+              <div id="cl-list">
+                <!-- rendered by JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Activity -->
+          <div class="d-card">
+            <div class="d-card-head">
+              <span class="d-card-title">Recent Activity</span>
+            </div>
+            <div class="d-card-body" style="padding:0 18px;">
+              <div class="act"><div class="act-dot"></div><div><div class="act-txt">Account <strong>created</strong> successfully</div><div class="act-time">Today</div></div></div>
+              <div class="act"><div class="act-dot dim"></div><div><div class="act-txt">Add your <strong>personal details</strong></div><div class="act-time">Pending</div></div></div>
+              <div class="act"><div class="act-dot dim"></div><div><div class="act-txt">Choose a <strong>portfolio template</strong></div><div class="act-time">Pending</div></div></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" style="position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;align-items:flex-end;"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
+<script src="js/script.js"></script>
+<script>
+'use strict';
+
+/* ── Template names map ─────────────────────────────────────── */
+const TNAMES = {
+  1:'Obsidian Dark',2:'Ivory Editorial',3:'Neon Terminal',4:'Coral Creative',
+  5:'Navy Corporate',6:'Violet Glass',7:'Sage Academic',8:'Midnight Split',
+  9:'Rose Gold',10:'Arctic White',11:'Midnight Blue',12:'Carbon Matrix',
+  13:'Electric Purple',14:'Deep Space',15:'Hacker Green',16:'Rust & Steel',
+  17:'Slate Ocean',18:'Neon Sunset',19:'Dark Matter',20:'Terminal Classic',
+};
+
+let _uid = null;
+
+/* ── Toast ──────────────────────────────────────────────────── */
+function toast(msg, type) {
+  const c = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.style.cssText = 'display:flex;align-items:center;gap:8px;padding:10px 16px;border-radius:10px;background:#1e1e1e;border:1px solid rgba(240,237,232,0.15);color:#f0ede8;font-size:0.82rem;box-shadow:0 8px 32px rgba(0,0,0,0.5);font-family:Plus Jakarta Sans,sans-serif;max-width:300px;';
+  if (type === 'success') el.style.borderColor = 'rgba(52,211,153,0.4)';
+  if (type === 'error')   el.style.borderColor = 'rgba(255,107,107,0.4)';
+  el.textContent = msg;
+  c.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+/* ── Copy portfolio link ────────────────────────────────────── */
+async function copyLink() {
+  if (!_uid) { toast('Not logged in', 'error'); return; }
+  const url = `${location.origin}/portfolio.html?uid=${_uid}`;
+  try { await navigator.clipboard.writeText(url); toast('Portfolio link copied! 🔗', 'success'); }
+  catch { toast('Link: ' + url, 'default'); }
+}
+
+/* ── Safe JSON parse ────────────────────────────────────────── */
+function safeArr(v) {
+  if (Array.isArray(v)) return v;
+  try { return JSON.parse(v) || []; } catch { return []; }
+}
+
+/* ── Get initials ───────────────────────────────────────────── */
+function initials(name) {
+  return (name || '?').trim().split(/\s+/).slice(0,2).map(w => (w[0]||'').toUpperCase()).join('') || '?';
+}
+
+/* ── Profile completion % ───────────────────────────────────── */
+function calcPct(d) {
+  if (!d) return 0;
+  return Math.round([
+    !!d.name, !!d.email, !!d.phone, !!d.about, !!d.portfolio_title,
+    safeArr(d.skills).length > 0, safeArr(d.education).length > 0,
+    safeArr(d.experience).length > 0, safeArr(d.projects).length > 0,
+    !!(d.github || d.linkedin)
+  ].filter(Boolean).length / 10 * 100);
+}
+
+/* ── Populate dashboard ─────────────────────────────────────── */
+function populateDash(d) {
+  const pct = calcPct(d);
+
+  /* Stats */
+  document.getElementById('stat-pct').textContent = pct + '%';
+  document.getElementById('prog-val').textContent  = pct + '%';
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('stat-pct-sub').textContent =
+    pct === 0 ? 'Start adding details →' : pct < 50 ? 'Keep going!' : pct < 80 ? 'Good progress ↑' : 'Almost complete!';
+  document.getElementById('prog-hint').textContent =
+    pct < 30 ? 'Fill in your details to strengthen your profile' :
+    pct < 60 ? 'Add more details to increase profile strength' :
+    pct < 100 ? 'Great work! Just a few more fields to go' : 'Profile is 100% complete ✓';
+
+  const tid = d && d.selected_template;
+  document.getElementById('stat-tmpl').textContent = tid ? (TNAMES[tid] || 'Template #' + tid) : 'None chosen';
+
+  const isLive = pct >= 60;
+  const se = document.getElementById('stat-status');
+  se.textContent = isLive ? 'Live' : 'Draft';
+  se.style.color = isLive ? '#34d399' : '#f0ede8';
+  document.getElementById('stat-status-sub').textContent =
+    isLive ? 'Portfolio ready to share ✓' : 'Complete profile to go live';
+
+  /* Checklist */
+  const checks = [
+    { label: 'Create your account',         done: true },
+    { label: 'Add personal info',            done: !!(d && d.name && d.email) },
+    { label: 'Write your About Me',          done: !!(d && d.about) },
+    { label: 'Add skills & experience',      done: safeArr(d && d.skills).length > 0 || safeArr(d && d.experience).length > 0 },
+    { label: 'Choose a template',            done: !!(d && d.selected_template) },
+  ];
+  const doneN = checks.filter(c => c.done).length;
+  document.getElementById('cl-prog').textContent = doneN + ' / 5';
+  document.getElementById('cl-list').innerHTML = checks.map(c => `
+    <div class="cl-item">
+      <div class="cl-dot ${c.done ? 'done' : 'todo'}">${c.done ? '✓' : '·'}</div>
+      <span style="color:${c.done ? '#f0ede8' : 'rgba(240,237,232,0.4)'}">${c.label}</span>
+    </div>
+  `).join('');
+}
+
+/* ── Theme ──────────────────────────────────────────────────── */
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('pc-theme', t);
+  const btn = document.getElementById('theme-btn');
+  if (btn) btn.textContent = t === 'dark' ? '☀️' : '🌙';
+}
+function toggleTheme() {
+  applyTheme((document.documentElement.getAttribute('data-theme') || 'dark') === 'dark' ? 'light' : 'dark');
+}
+
+/* ── Sidebar toggle ─────────────────────────────────────────── */
+function initSB() {
+  const sb  = document.getElementById('sidebar');
+  const ov  = document.getElementById('sidebar-overlay');
+  const hm  = document.getElementById('ham-btn');
+  const cls = document.getElementById('sidebar-close');
+  const open  = () => { sb.classList.add('open'); ov.classList.add('show'); };
+  const close = () => { sb.classList.remove('open'); ov.classList.remove('show'); };
+  hm?.addEventListener('click', open);
+  cls?.addEventListener('click', close);
+  ov?.addEventListener('click', close);
+  const resize = () => { hm.style.display = window.innerWidth <= 900 ? 'flex' : 'none'; };
+  window.addEventListener('resize', resize);
+  resize();
+}
+
+/* ── Main ───────────────────────────────────────────────────── */
+async function init() {
+  applyTheme(localStorage.getItem('pc-theme') || 'dark');
+  document.getElementById('theme-btn')?.addEventListener('click', toggleTheme);
+  document.getElementById('theme-link')?.addEventListener('click', toggleTheme);
+  initSB();
+
+  // Auth guard
+  let user;
+  try { user = await Auth.requireAuth('login.html'); }
+  catch(e) { console.error(e); window.location.href = 'login.html'; return; }
+  if (!user) return;
+
+  _uid = user.id;
+
+  // ── Resolve display name ──
+  // Supabase puts name in user_metadata.full_name OR user_metadata.name
+  const m = user.user_metadata || {};
+  const displayName = (m.full_name || m.name || '').trim() || user.email.split('@')[0];
+  const firstName   = displayName.split(' ')[0];
+
+  // Update UI
+  document.getElementById('greeting-name').textContent  = firstName;
+  document.getElementById('greeting-date').textContent  =
+    new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+  document.getElementById('user-name').textContent   = displayName;
+  document.getElementById('user-email').textContent  = user.email || '';
+  document.getElementById('user-avatar').textContent = initials(displayName);
+
+  // Sign out
+  document.getElementById('sign-out-btn')?.addEventListener('click', async () => {
+    try { await Auth.signOut(); } catch(e) { window.location.href = 'index.html'; }
+  });
+
+  // Load from Supabase
+  let details = null;
+  try {
+    const { data, error } = await DB.getDetails(user.id);
+    if (!error) details = data;
+    else console.warn('DB error:', error.message);
+  } catch(e) { console.warn('DB fetch failed:', e); }
+
+  // Populate (works even with null details)
+  populateDash(details);
+}
+
+init().catch(err => {
+  console.error('Dashboard init failed:', err);
+  // Still try to show something
+  populateDash(null);
+});
+</script>
+</body>
+</html>
