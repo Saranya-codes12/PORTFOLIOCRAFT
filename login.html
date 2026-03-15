@@ -4,107 +4,445 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sign In — PortfolioCraft</title>
-  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=DM+Mono:wght@400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#080808;--bg2:#0f0f0f;--bg3:#161616;
+      --amber:#F5A623;
+      --text:#f0ede8;--text2:rgba(240,237,232,.6);--text3:rgba(240,237,232,.35);
+      --border:rgba(240,237,232,.1);--border2:rgba(240,237,232,.2);
+      --surface:rgba(255,255,255,.04);--surface2:rgba(255,255,255,.08);
+    }
+    [data-theme="light"]{
+      --bg:#faf9f7;--bg2:#f3f1ed;--bg3:#ede9e2;
+      --text:#1a1612;--text2:rgba(26,22,18,.65);--text3:rgba(26,22,18,.4);
+      --border:rgba(26,22,18,.12);--border2:rgba(26,22,18,.22);
+      --surface:rgba(0,0,0,.03);--surface2:rgba(0,0,0,.06);
+    }
+    body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;transition:background .3s,color .3s}
+    .wrap{display:flex;width:100%;min-height:100vh}
+
+    /* Left visual */
+    .visual{flex:1;position:relative;overflow:hidden;background:linear-gradient(135deg,#0d0d1a,#1a1040,#0d0820);display:flex;flex-direction:column;justify-content:space-between;padding:48px}
+    .v-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);background-size:50px 50px;mask-image:radial-gradient(ellipse at 40% 50%,black 30%,transparent 80%);-webkit-mask-image:radial-gradient(ellipse at 40% 50%,black 30%,transparent 80%)}
+    .orb{position:absolute;border-radius:50%;filter:blur(80px);opacity:.15}
+    .o1{width:500px;height:500px;background:var(--amber);top:-150px;left:-100px;animation:drift 10s ease-in-out infinite}
+    .o2{width:350px;height:350px;background:#7c5cbf;bottom:-100px;right:-80px;animation:drift 10s 4s ease-in-out infinite}
+    @keyframes drift{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,-20px)}}
+    .v-logo{position:relative;z-index:1;font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600;display:flex;align-items:center;gap:10px;text-decoration:none;color:#f0ede8}
+    .logo-mark{width:34px;height:34px;background:var(--amber);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:.9rem;font-weight:700;color:#080808;flex-shrink:0}
+    .v-quote{position:relative;z-index:1}
+    .v-quote blockquote{font-family:'Cormorant Garamond',serif;font-size:2rem;font-weight:300;font-style:italic;line-height:1.4;color:#f0ede8;margin-bottom:14px}
+    .v-quote cite{font-size:.72rem;font-family:'DM Mono',monospace;color:rgba(240,237,232,.4);letter-spacing:.1em;font-style:normal}
+    .v-feats{position:relative;z-index:1;display:flex;flex-direction:column;gap:12px}
+    .vf{display:flex;align-items:center;gap:10px;font-size:.875rem;color:rgba(240,237,232,.65)}
+    .vf-ic{width:28px;height:28px;border-radius:7px;flex-shrink:0;background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.25);display:flex;align-items:center;justify-content:center;font-size:.78rem;color:var(--amber)}
+
+    /* Right form panel */
+    .form-panel{width:480px;flex-shrink:0;background:var(--bg2);display:flex;flex-direction:column;justify-content:center;padding:60px 52px;position:relative}
+    .theme-btn{position:absolute;top:24px;right:24px;width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:1rem;transition:all .2s}
+    .theme-btn:hover{border-color:var(--amber)}
+    .form-title{font-family:'Cormorant Garamond',serif;font-size:2.2rem;font-weight:300;margin-bottom:8px}
+    .form-sub{font-size:.875rem;color:var(--text2);margin-bottom:32px}
+    .form-sub a{color:var(--amber);text-decoration:underline;text-underline-offset:3px}
+
+    /* Alert */
+    .alert{padding:12px 16px;border-radius:10px;font-size:.85rem;margin-bottom:18px;display:none;align-items:center;gap:10px;line-height:1.5}
+    .alert-err{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5}
+    .alert-ok{background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);color:#6ee7b7}
+
+    /* OAuth buttons */
+    .oauth-wrap{display:flex;flex-direction:column;gap:10px;margin-bottom:22px}
+    .oauth-btn{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:13px 20px;border-radius:10px;font-size:.9rem;font-weight:500;cursor:pointer;font-family:inherit;transition:all .2s;border:1px solid var(--border2);background:var(--surface);color:var(--text)}
+    .oauth-btn:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,0,0,.35)}
+    .oauth-btn:active{transform:scale(.98)}
+    .oauth-btn:disabled{opacity:.6;cursor:not-allowed;transform:none;box-shadow:none}
+    #btn-google{border-color:rgba(66,133,244,.45)}
+    #btn-google:hover{border-color:rgba(66,133,244,.8);background:rgba(66,133,244,.06)}
+    #btn-github{border-color:rgba(240,237,232,.22)}
+    #btn-github:hover{border-color:rgba(240,237,232,.5);background:var(--surface2)}
+    .btn-icon{width:20px;height:20px;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+
+    /* Divider */
+    .divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--text3);font-size:.8rem}
+    .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--border)}
+
+    /* Form inputs */
+    .fg{margin-bottom:16px}
+    .fg label{display:block;font-size:.72rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--text2);margin-bottom:7px}
+    .fg-rel{position:relative}
+    .fg input{width:100%;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-size:.9rem;font-family:inherit;outline:none;transition:all .2s}
+    .fg input:focus{border-color:var(--amber);background:var(--surface2);box-shadow:0 0 0 3px rgba(245,166,35,.12)}
+    .fg input::placeholder{color:var(--text3)}
+    .fg input.pr{padding-right:44px}
+    .eye-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text3);font-size:1rem;padding:4px}
+    .row2{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px}
+    .remember{display:flex;align-items:center;gap:8px;font-size:.83rem;color:var(--text2);cursor:pointer}
+    .remember input{accent-color:var(--amber);width:15px;height:15px}
+    .forgot{font-size:.83rem;color:var(--amber);text-decoration:none}
+
+    /* Submit */
+    .submit-btn{width:100%;padding:13px;border-radius:10px;border:none;background:var(--amber);color:#080808;font-size:.92rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+    .submit-btn:hover{box-shadow:0 6px 24px rgba(245,166,35,.4);transform:translateY(-1px)}
+    .submit-btn:disabled{opacity:.65;cursor:not-allowed;transform:none;box-shadow:none}
+    .switch{text-align:center;margin-top:22px;font-size:.875rem;color:var(--text3)}
+    .switch a{color:var(--amber);font-weight:600;text-decoration:none}
+
+    /* Spinners */
+    .spin{width:16px;height:16px;border:2px solid rgba(8,8,8,.3);border-top-color:#080808;border-radius:50%;animation:spin .7s linear infinite;flex-shrink:0}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    /* Loading overlay */
+    #ov{display:none;position:fixed;inset:0;z-index:9999;background:var(--bg);flex-direction:column;align-items:center;justify-content:center;gap:20px}
+    #ov.show{display:flex}
+    .big-spin{width:52px;height:52px;border:3px solid rgba(245,166,35,.2);border-top-color:var(--amber);border-radius:50%;animation:spin .8s linear infinite}
+    .ov-msg{font-family:'DM Mono',monospace;font-size:.82rem;color:var(--text2);letter-spacing:.06em;text-align:center}
+    .ov-sub{font-size:.72rem;color:var(--text3);font-family:'DM Mono',monospace;text-align:center;max-width:300px}
+
+    @media(max-width:900px){.visual{display:none}.form-panel{width:100%;min-height:100vh;padding:60px 32px}}
+    @media(max-width:480px){.form-panel{padding:50px 20px}}
+  </style>
 </head>
 <body>
-<div class="auth-layout">
 
-  <div class="auth-visual">
-    <div class="auth-visual-bg"></div>
-    <a href="index.html" class="auth-visual-logo">
-      <div class="nav-logo-mark">P</div>PortfolioCraft
+<!-- Loading overlay -->
+<div id="ov">
+  <div class="big-spin"></div>
+  <div class="ov-msg" id="ov-msg">Redirecting…</div>
+  <div class="ov-sub" id="ov-sub">Please wait</div>
+</div>
+
+<div class="wrap">
+
+  <!-- Left visual panel -->
+  <div class="visual">
+    <div class="v-grid"></div>
+    <div class="orb o1"></div>
+    <div class="orb o2"></div>
+    <a href="index.html" class="v-logo">
+      <div class="logo-mark">P</div>
+      PortfolioCraft
     </a>
-    <div class="auth-visual-quote">
+    <div class="v-quote">
       <blockquote>"Your portfolio is the first impression before the interview."</blockquote>
       <cite>— PORTFOLIOCRAFT TEAM</cite>
     </div>
-    <div class="auth-visual-features">
-      <div class="auth-feature"><div class="auth-feature-icon">🎨</div>50 premium templates</div>
-      <div class="auth-feature"><div class="auth-feature-icon">⚡</div>Live real-time preview</div>
-      <div class="auth-feature"><div class="auth-feature-icon">📄</div>One-click PDF resume</div>
-      <div class="auth-feature"><div class="auth-feature-icon">🔗</div>Shareable portfolio link</div>
-      <div class="auth-feature"><div class="auth-feature-icon">💾</div>Auto-save everything</div>
+    <div class="v-feats">
+      <div class="vf"><div class="vf-ic">🎨</div>50 premium templates</div>
+      <div class="vf"><div class="vf-ic">⚡</div>Live real-time preview</div>
+      <div class="vf"><div class="vf-ic">📄</div>One-click PDF resume</div>
+      <div class="vf"><div class="vf-ic">🔗</div>Shareable portfolio link</div>
     </div>
   </div>
 
-  <div class="auth-form-side">
-    <div class="auth-form-wrap">
-      <button class="theme-btn" style="margin-bottom:32px;">☀️</button>
-      <div class="auth-title">Welcome back.</div>
-      <p class="auth-sub">Don't have an account? <a href="signup.html">Create one free →</a></p>
+  <!-- Right form panel -->
+  <div class="form-panel">
+    <button class="theme-btn" id="theme-btn">☀️</button>
 
-      <div id="alert-box" style="display:none;" class="alert"></div>
+    <h1 class="form-title">Welcome back.</h1>
+    <p class="form-sub">No account? <a href="signup.html">Create one free →</a></p>
 
-      <form id="login-form" novalidate>
-        <div class="form-group">
-          <label class="form-label">Email address</label>
-          <div class="form-input-icon">
-            <span class="icon">✉</span>
-            <input class="form-input" type="email" id="email" placeholder="you@example.com" required>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Password</label>
-          <div class="form-input-icon">
-            <span class="icon">🔒</span>
-            <input class="form-input" type="password" id="password" placeholder="Your password" required>
-          </div>
-        </div>
-        <button type="submit" class="btn btn-primary" id="login-btn"
-          style="width:100%;justify-content:center;margin-top:8px;">
-          Sign In →
-        </button>
-      </form>
+    <div class="alert" id="alert-box"></div>
 
-      <div class="sep"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-        <button class="btn btn-dark" onclick="Toast.show('Google OAuth coming soon!','info')" style="justify-content:center;">
-          G &nbsp;Google
-        </button>
-        <button class="btn btn-dark" onclick="Toast.show('GitHub OAuth coming soon!','info')" style="justify-content:center;">
-          ⌥ &nbsp;GitHub
-        </button>
+    <div class="oauth-wrap">
+
+      <!-- ✅ GOOGLE BUTTON → calls signInWithGoogle() -->
+      <button
+        id="btn-google"
+        class="oauth-btn"
+        type="button"
+        onclick="signInWithGoogle()"
+      >
+        <span class="btn-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+        </span>
+        <span id="google-txt">Continue with Google</span>
+      </button>
+
+      <!-- ✅ GITHUB BUTTON → calls signInWithGitHub() -->
+      <button
+        id="btn-github"
+        class="oauth-btn"
+        type="button"
+        onclick="signInWithGitHub()"
+      >
+        <span class="btn-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24">
+            <path style="fill:var(--text)" d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+        </span>
+        <span id="github-txt">Continue with GitHub</span>
+      </button>
+
+    </div>
+
+    <div class="divider">or sign in with email</div>
+
+    <div class="fg">
+      <label for="inp-email">Email Address</label>
+      <input type="email" id="inp-email" placeholder="you@example.com" autocomplete="email">
+    </div>
+    <div class="fg">
+      <label for="inp-pwd">Password</label>
+      <div class="fg-rel">
+        <input type="password" id="inp-pwd" class="pr" placeholder="Your password" autocomplete="current-password">
+        <button type="button" class="eye-btn" id="eye-btn">👁</button>
       </div>
-      <p style="text-align:center;margin-top:24px;font-size:0.825rem;color:var(--text-40);">
-        Don't have an account? <a href="signup.html" style="color:var(--amber);">Sign up free</a>
-      </p>
     </div>
+    <div class="row2">
+      <label class="remember">
+        <input type="checkbox" id="cb-remember"> Remember me
+      </label>
+      <a href="#" class="forgot" onclick="forgotPassword(event)">Forgot password?</a>
+    </div>
+    <button type="button" class="submit-btn" id="btn-email" onclick="signInWithEmail()">
+      Sign In →
+    </button>
+
+    <p class="switch">No account? <a href="signup.html">Sign up free</a></p>
   </div>
+
 </div>
-<div id="toast-container"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
-<script src="js/script.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', async () => {
-  Theme.init();
-  document.querySelectorAll('.theme-btn').forEach(b => b.addEventListener('click', Theme.toggle));
-  await Auth.redirectIfAuthed('dashboard.html');
+'use strict';
 
-  const form     = document.getElementById('login-form');
-  const btn      = document.getElementById('login-btn');
-  const alertBox = document.getElementById('alert-box');
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    alertBox.style.display = 'none';
-    const email    = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value;
-    if (!email || !password) { showAlert('Please fill in all fields.', 'error'); return; }
-    setLoading(btn, true, 'Signing in…');
-    const { error } = await Auth.signIn(email, password);
-    if (error) { showAlert(error.message, 'error'); setLoading(btn, false, 'Sign In →'); return; }
-    Toast.show('Welcome back! 👋', 'success');
-    setTimeout(() => window.location.href = 'dashboard.html', 600);
-  });
-
-  function showAlert(msg, type) {
-    alertBox.className = `alert alert-${type}`;
-    alertBox.innerHTML = `<span>${type === 'error' ? '✕' : '✓'}</span> ${msg}`;
-    alertBox.style.display = 'flex';
-  }
+/* ─── Theme ─────────────────────── */
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('pc-theme', t);
+  const b = document.getElementById('theme-btn');
+  if (b) b.textContent = t === 'dark' ? '☀️' : '🌙';
+}
+document.getElementById('theme-btn').addEventListener('click', function() {
+  applyTheme(
+    document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark'
+  );
 });
+applyTheme(localStorage.getItem('pc-theme') || 'dark');
+
+/* ─── Overlay helpers ────────────── */
+function showOverlay(msg, sub) {
+  document.getElementById('ov-msg').textContent = msg || 'Please wait…';
+  document.getElementById('ov-sub').textContent = sub || '';
+  document.getElementById('ov').classList.add('show');
+}
+function hideOverlay() {
+  document.getElementById('ov').classList.remove('show');
+}
+
+/* ─── Alert helpers ──────────────── */
+function showAlert(msg, type) {
+  var b = document.getElementById('alert-box');
+  b.className = 'alert alert-' + (type || 'err');
+  b.innerHTML = '<span>' + (type === 'ok' ? '✓' : '✕') + '</span> ' + msg;
+  b.style.display = 'flex';
+}
+function hideAlert() {
+  document.getElementById('alert-box').style.display = 'none';
+}
+
+/* ─── Eye toggle ─────────────────── */
+document.getElementById('eye-btn').addEventListener('click', function() {
+  var i = document.getElementById('inp-pwd');
+  i.type = i.type === 'password' ? 'text' : 'password';
+  this.textContent = i.type === 'password' ? '👁' : '🙈';
+});
+
+/* ─── Redirect if already logged in ─ */
+(async function() {
+  try {
+    var res = await _supa.auth.getSession();
+    if (res.data.session) {
+      window.location.replace('dashboard.html');
+    }
+  } catch(e) {}
+})();
+
+/* ════════════════════════════════════════════
+   signInWithGoogle()
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   Called when user clicks "Continue with Google"
+   Uses redirectTo: dashboard.html exactly as
+   requested.
+
+   NOTE: For this to work you MUST add
+   http://127.0.0.1:5500/dashboard.html
+   to Supabase → Auth → URL Configuration →
+   Redirect URLs
+════════════════════════════════════════════ */
+async function signInWithGoogle() {
+  hideAlert();
+  showOverlay('Opening Google…', 'You will be redirected back after sign in');
+
+  document.getElementById('btn-google').disabled = true;
+  document.getElementById('google-txt').textContent = 'Connecting…';
+
+  try {
+    var result = await _supa.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: "http://127.0.0.1:5500/dashboard.html"
+      }
+    });
+
+    if (result.error) {
+      throw result.error;
+    }
+
+    // Browser will navigate to Google — overlay stays visible
+
+  } catch(err) {
+    console.error('Google sign-in error:', err);
+    hideOverlay();
+    document.getElementById('btn-google').disabled = false;
+    document.getElementById('google-txt').textContent = 'Continue with Google';
+
+    var msg = err.message || 'Google sign-in failed.';
+    if (msg.includes('not enabled') || msg.includes('Unsupported')) {
+      msg = 'Google is not enabled. Go to Supabase Dashboard → Authentication → Providers → enable Google.';
+    }
+    if (msg.includes('Unable to exchange')) {
+      msg = 'Google OAuth config error. Make sure the Authorized Redirect URI in Google Console is: https://YOUR_PROJECT.supabase.co/auth/v1/callback';
+    }
+    showAlert(msg);
+  }
+}
+
+/* ════════════════════════════════════════════
+   signInWithGitHub()
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   Called when user clicks "Continue with GitHub"
+════════════════════════════════════════════ */
+async function signInWithGitHub() {
+  hideAlert();
+  showOverlay('Opening GitHub…', 'You will be redirected back after sign in');
+
+  document.getElementById('btn-github').disabled = true;
+  document.getElementById('github-txt').textContent = 'Connecting…';
+
+  try {
+    var result = await _supa.auth.signInWithOAuth({
+      provider: 'github',
+      options: {
+        redirectTo: "http://127.0.0.1:5500/dashboard.html",
+        scopes: 'read:user user:email'
+      }
+    });
+
+    if (result.error) {
+      throw result.error;
+    }
+
+  } catch(err) {
+    console.error('GitHub sign-in error:', err);
+    hideOverlay();
+    document.getElementById('btn-github').disabled = false;
+    document.getElementById('github-txt').textContent = 'Continue with GitHub';
+
+    var msg = err.message || 'GitHub sign-in failed.';
+    if (msg.includes('not enabled') || msg.includes('Unsupported')) {
+      msg = 'GitHub is not enabled. Go to Supabase Dashboard → Authentication → Providers → enable GitHub.';
+    }
+    showAlert(msg);
+  }
+}
+
+/* ════════════════════════════════════════════
+   signInWithEmail()
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   Called when user clicks "Sign In →" button
+════════════════════════════════════════════ */
+async function signInWithEmail() {
+  hideAlert();
+
+  var email = document.getElementById('inp-email').value.trim();
+  var pwd   = document.getElementById('inp-pwd').value;
+  var btn   = document.getElementById('btn-email');
+
+  if (!email) { showAlert('Please enter your email address.'); return; }
+  if (!pwd)   { showAlert('Please enter your password.'); return; }
+
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spin"></div> Signing in…';
+
+  try {
+    var res = await _supa.auth.signInWithPassword({
+      email: email,
+      password: pwd
+    });
+
+    if (res.error) throw res.error;
+
+    // Success — go to dashboard
+    btn.innerHTML = '✓ Success!';
+    showOverlay('Sign in successful!', 'Redirecting to your dashboard…');
+    setTimeout(function() {
+      window.location.replace('dashboard.html');
+    }, 600);
+
+  } catch(err) {
+    var msg = err.message || 'Sign in failed.';
+    if (msg.includes('Invalid login'))      msg = 'Incorrect email or password.';
+    if (msg.includes('Email not confirmed'))msg = 'Please confirm your email — check your inbox.';
+    if (msg.includes('Too many'))           msg = 'Too many attempts. Please wait a moment.';
+
+    showAlert(msg);
+    btn.disabled = false;
+    btn.innerHTML = 'Sign In →';
+  }
+}
+
+/* ─── Forgot password ────────────── */
+async function forgotPassword(e) {
+  e.preventDefault();
+  hideAlert();
+  var email = document.getElementById('inp-email').value.trim();
+  if (!email) {
+    showAlert('Enter your email above first, then click Forgot password.');
+    return;
+  }
+  try {
+    var res = await _supa.auth.resetPasswordForEmail(email, {
+      redirectTo: 'http://127.0.0.1:5500/login.html'
+    });
+    if (res.error) throw res.error;
+    showAlert('Password reset email sent! Check your inbox.', 'ok');
+  } catch(err) {
+    showAlert('Could not send: ' + err.message);
+  }
+}
+
+/* ════════════════════════════════════════════
+   Handle OAuth callback on dashboard.html
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   Since redirectTo points to dashboard.html,
+   the dashboard page handles session creation.
+   No additional code needed here for that.
+
+   BUT if Supabase redirects back to login.html
+   with an error in the URL, show it:
+════════════════════════════════════════════ */
+(function handleUrlError() {
+  var search = window.location.search;
+  var hash   = window.location.hash;
+  if (search.includes('error=') || hash.includes('error=')) {
+    var params = new URLSearchParams(
+      (search + '&' + hash.replace('#','')).replace('?','')
+    );
+    var desc = params.get('error_description') || 'Sign in failed.';
+    desc = decodeURIComponent(desc.replace(/\+/g, ' '));
+    setTimeout(function() { showAlert(desc); }, 200);
+  }
+})();
 </script>
 </body>
 </html>

@@ -10,22 +10,41 @@ const Auth = {
       options: { data: { full_name: name } }
     });
   },
+
   async signIn(email, password) {
     return await _supa.auth.signInWithPassword({ email, password });
   },
+
+  // ✅ ADDED GOOGLE LOGIN (nothing else changed)
+  
+async signInWithGoogle() {
+  const { data, error } = await _supa.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: window.location.origin
+    }
+  });
+
+  if (error) {
+    console.error(error);
+  }
+},
   async signOut() {
     await _supa.auth.signOut();
     window.location.href = 'index.html';
   },
+
   async getUser() {
     const { data: { user } } = await _supa.auth.getUser();
     return user;
   },
+
   async requireAuth(redirectTo = 'login.html') {
     const user = await this.getUser();
     if (!user) { window.location.href = redirectTo; return null; }
     return user;
   },
+
   async redirectIfAuthed(to = 'dashboard.html') {
     const user = await this.getUser();
     if (user) window.location.href = to;
@@ -36,11 +55,13 @@ const DB = {
   async getDetails(userId) {
     return await _supa.from('user_details').select('*').eq('user_id', userId).maybeSingle();
   },
+
   async upsertDetails(userId, payload) {
     return await _supa.from('user_details')
       .upsert({ ...payload, user_id: userId, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
       .select().single();
   },
+
   async patchDetails(userId, fields) {
     return await _supa.from('user_details')
       .update({ ...fields, updated_at: new Date().toISOString() })
